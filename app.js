@@ -1,0 +1,535 @@
+const regularPeriods = [
+  {
+    label: 'Period 1',
+    start: '07:45',
+    end: '08:30',
+    segments: [
+      { start: '07:45', end: '08:00', label: 'First 15 min — NO LEAVING', kind: 'no_bathroom' },
+      { start: '08:00', end: '08:15', label: 'RR WINDOW — 15 min max, 2 students per class', kind: 'bathroom_window', bathroom: true },
+      { start: '08:15', end: '08:30', label: 'Last 15 min — NO LEAVING', kind: 'no_bathroom' }
+    ]
+  },
+  {
+    label: 'Period 2',
+    start: '08:35',
+    end: '09:20',
+    segments: [
+      { start: '08:35', end: '08:50', label: 'First 15 min — NO LEAVING', kind: 'no_bathroom' },
+      { start: '08:50', end: '09:05', label: 'RR WINDOW — 15 min max, 2 students per class', kind: 'bathroom_window', bathroom: true },
+      { start: '09:05', end: '09:20', label: 'Last 15 min — NO LEAVING', kind: 'no_bathroom' }
+    ]
+  },
+  {
+    label: 'Period 3',
+    start: '09:25',
+    end: '10:10',
+    segments: [
+      { start: '09:25', end: '09:40', label: 'First 15 min — NO LEAVING', kind: 'no_bathroom' },
+      { start: '09:40', end: '09:55', label: 'RR WINDOW — 15 min max, 2 students per class', kind: 'bathroom_window', bathroom: true },
+      { start: '09:55', end: '10:10', label: 'Last 15 min — NO LEAVING', kind: 'no_bathroom' }
+    ]
+  },
+  { label: 'Period 4', start: '10:15', end: '11:50', segments: [] },
+  {
+    label: 'Period 5',
+    start: '11:55',
+    end: '12:40',
+    segments: [
+      { start: '11:55', end: '12:10', label: 'First 15 min — NO LEAVING', kind: 'no_bathroom' },
+      { start: '12:10', end: '12:25', label: 'RR WINDOW — 15 min max, 2 students per class', kind: 'bathroom_window', bathroom: true },
+      { start: '12:25', end: '12:40', label: 'Last 15 min — NO LEAVING', kind: 'no_bathroom' }
+    ]
+  },
+  {
+    label: 'Period 6',
+    start: '12:45',
+    end: '13:30',
+    segments: [
+      { start: '12:45', end: '13:00', label: 'First 15 min — NO LEAVING', kind: 'no_bathroom' },
+      { start: '13:00', end: '13:15', label: 'RR WINDOW — 15 min max, 2 students per class', kind: 'bathroom_window', bathroom: true },
+      { start: '13:15', end: '13:30', label: 'Last 15 min — NO LEAVING', kind: 'no_bathroom' }
+    ]
+  },
+  {
+    label: 'Period 7',
+    start: '13:35',
+    end: '14:20',
+    segments: [
+      { start: '13:35', end: '13:50', label: 'First 15 min — NO LEAVING', kind: 'no_bathroom' },
+      { start: '13:50', end: '14:05', label: 'RR WINDOW — 15 min max, 2 students at a time', kind: 'bathroom_window', bathroom: true },
+      { start: '14:05', end: '14:20', label: 'Last 15 min — NO LEAVING', kind: 'no_bathroom' }
+    ]
+  }
+];
+
+const period4Tracks = {
+  A: [
+    { start: '10:15', end: '10:40', label: 'A Lunch', kind: 'lunch' },
+    { start: '10:45', end: '11:30', label: 'Period 4 Class (A Lunch Track)', kind: 'class' }
+  ],
+  B: [
+    { start: '10:15', end: '10:45', label: 'Period 4 Class (B Lunch Track)', kind: 'class' },
+    { start: '10:45', end: '11:15', label: 'B Lunch', kind: 'lunch' },
+    { start: '11:20', end: '11:35', label: 'Period 4 Class (B Lunch Track)', kind: 'class' }
+  ],
+  C: [
+    { start: '10:15', end: '11:00', label: 'Period 4 Class (C Lunch Track)', kind: 'class' },
+    { start: '11:20', end: '11:50', label: 'C Lunch', kind: 'lunch' }
+  ],
+  PLANNING: [
+    { start: '10:40', end: '11:50', label: 'My Planning', kind: 'planning' }
+  ]
+};
+
+const delaySchedule = [
+  { label: 'Period 1', start: '09:45', end: '10:10', segments: [{ start: '09:45', end: '10:10', label: 'Class Block', kind: 'class' }] },
+  { label: 'Period 4', start: '10:15', end: '11:50', segments: [{ start: '10:15', end: '11:50', label: 'Class / Lunch Rotation Block', kind: 'class' }] },
+  { label: 'Period 2', start: '11:55', end: '12:20', segments: [{ start: '11:55', end: '12:20', label: 'Class Block', kind: 'class' }] },
+  { label: 'Period 3', start: '12:25', end: '12:50', segments: [{ start: '12:25', end: '12:50', label: 'Class Block', kind: 'class' }] },
+  { label: 'Period 5', start: '12:55', end: '13:20', segments: [{ start: '12:55', end: '13:20', label: 'Class Block', kind: 'class' }] },
+  { label: 'Period 6', start: '13:25', end: '13:50', segments: [{ start: '13:25', end: '13:50', label: 'Class Block', kind: 'class' }] },
+  { label: 'Period 7', start: '13:55', end: '14:20', segments: [{ start: '13:55', end: '14:20', label: 'Class Block', kind: 'class' }] }
+];
+
+const defaultResources = [
+  { label: 'LMS', url: 'https://classroom.google.com' },
+  { label: 'Gradebook', url: 'https://www.powerschool.com' },
+  { label: 'Slides', url: 'https://docs.google.com/presentation' }
+];
+
+const scheduleContainer = document.getElementById('schedule');
+const modeSelect = document.getElementById('scheduleMode');
+const trackSelect = document.getElementById('period4Track');
+const clockEl = document.getElementById('liveClock');
+const dateEl = document.getElementById('todayDate');
+const statusEl = document.getElementById('nowStatus');
+const scheduleTimerEl = document.getElementById('scheduleTimer');
+const resourceButtons = document.getElementById('resourceButtons');
+const resourceForm = document.getElementById('resourceForm');
+const siteLabelInput = document.getElementById('siteLabel');
+const siteUrlInput = document.getElementById('siteUrl');
+const siteFrame = document.getElementById('siteFrame');
+const openExternal = document.getElementById('openExternal');
+const lofiToggleButton = document.getElementById('lofiToggle');
+const lofiStatusEl = document.getElementById('lofiStatus');
+const timerDurationSelect = document.getElementById('timerDuration');
+const timerStartButton = document.getElementById('timerStart');
+const timerResetButton = document.getElementById('timerReset');
+const timerDisplayEl = document.getElementById('timerDisplay');
+const timerStatusEl = document.getElementById('timerStatus');
+
+let resources = loadResources();
+let activeSite = resources[0];
+let audioContext;
+let lofiMasterGain;
+let lofiIntervalId;
+let lofiIsOn = false;
+let timerIntervalId;
+let timerEndTimestamp;
+let remainingSeconds = 180;
+let timerIsRunning = false;
+
+function toMinutes(hhmm) {
+  const [hours, minutes] = hhmm.split(':').map(Number);
+  return (hours * 60) + minutes;
+}
+
+function formatTime(hhmm) {
+  const [h, m] = hhmm.split(':').map(Number);
+  const hour12 = ((h + 11) % 12) + 1;
+  const ampm = h >= 12 ? 'PM' : 'AM';
+  return `${hour12}:${String(m).padStart(2, '0')} ${ampm}`;
+}
+
+function currentMinutes() {
+  const now = new Date();
+  return now.getHours() * 60 + now.getMinutes();
+}
+
+function toSeconds(hhmm) {
+  return toMinutes(hhmm) * 60;
+}
+
+function currentSeconds() {
+  const now = new Date();
+  return (now.getHours() * 3600) + (now.getMinutes() * 60) + now.getSeconds();
+}
+
+function formatCountdown(totalSeconds) {
+  const safeSeconds = Math.max(0, totalSeconds);
+  const hours = Math.floor(safeSeconds / 3600);
+  const minutes = Math.floor((safeSeconds % 3600) / 60);
+  const seconds = safeSeconds % 60;
+
+  if (hours > 0) {
+    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+  }
+  return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+}
+
+function buildRegularSchedule() {
+  return regularPeriods.map((period) => {
+    if (period.label !== 'Period 4') return period;
+    return { ...period, segments: period4Tracks[trackSelect.value] };
+  });
+}
+
+function activeSchedule() {
+  return modeSelect.value === 'delay' ? delaySchedule : buildRegularSchedule();
+}
+
+function getCurrentPeriod(periods) {
+  const now = currentMinutes();
+  return periods.findIndex((period) => now >= toMinutes(period.start) && now < toMinutes(period.end));
+}
+
+function getCurrentSegment(period) {
+  const now = currentMinutes();
+  return period.segments.find((segment) => now >= toMinutes(segment.start) && now < toMinutes(segment.end));
+}
+
+function bathroomOpen(segment) {
+  return Boolean(segment?.bathroom);
+}
+
+function renderSchedule() {
+  const periods = activeSchedule();
+  const currentPeriodIndex = getCurrentPeriod(periods);
+  scheduleContainer.innerHTML = '';
+
+  periods.forEach((period, index) => {
+    const card = document.createElement('article');
+    card.className = 'block';
+    if (index === currentPeriodIndex) card.classList.add('current');
+    if (index < currentPeriodIndex) card.classList.add('past');
+
+    const segment = index === currentPeriodIndex ? getCurrentSegment(period) : null;
+    const showBathroom = bathroomOpen(segment);
+
+    const segmentsMarkup = period.segments.map((part) => {
+      const isCurrentPart = segment && segment.start === part.start && segment.end === part.end;
+      return `
+        <li class="segment ${isCurrentPart ? 'segment-current' : ''} kind-${part.kind}">
+          <span>${formatTime(part.start)} - ${formatTime(part.end)}</span>
+          <span>${part.label}</span>
+        </li>
+      `;
+    }).join('');
+
+    card.innerHTML = `
+      <div class="block-head">
+        <p class="time">${formatTime(period.start)} - ${formatTime(period.end)}</p>
+        <span class="pill">${period.label}</span>
+      </div>
+      <ul class="segments">${segmentsMarkup}</ul>
+      <div class="bathroom-window ${showBathroom ? 'open' : ''}">
+        <p><strong>Bathroom window OPEN:</strong> 15 min max • 2 students at a time.</p>
+      </div>
+    `;
+
+    scheduleContainer.appendChild(card);
+  });
+
+  updateStatus(periods, currentPeriodIndex);
+  updateScheduleTimer(periods, currentPeriodIndex);
+}
+
+function updateStatus(periods, currentPeriodIndex) {
+  const now = currentMinutes();
+  if (currentPeriodIndex < 0) {
+    const first = periods[0];
+    const last = periods[periods.length - 1];
+    if (now < toMinutes(first.start)) {
+      statusEl.textContent = `Before school day (${formatTime(first.start)} start).`;
+    } else {
+      statusEl.textContent = `After school day (${formatTime(last.end)} end).`;
+    }
+    return;
+  }
+
+  const period = periods[currentPeriodIndex];
+  const segment = getCurrentSegment(period);
+  statusEl.textContent = segment
+    ? `Now: ${period.label} — ${segment.label}`
+    : `Now: ${period.label}`;
+}
+
+
+function updateScheduleTimer(periods, currentPeriodIndex) {
+  if (!scheduleTimerEl) return;
+
+  const nowSeconds = currentSeconds();
+
+  if (currentPeriodIndex < 0) {
+    const firstPeriod = periods[0];
+    const schoolStart = toSeconds(firstPeriod.start);
+
+    if (nowSeconds < schoolStart) {
+      const secondsUntilStart = schoolStart - nowSeconds;
+      scheduleTimerEl.textContent = `Starts in ${formatCountdown(secondsUntilStart)} (${formatTime(firstPeriod.start)}).`;
+    } else {
+      scheduleTimerEl.textContent = 'School day has ended.';
+    }
+    return;
+  }
+
+  const currentPeriod = periods[currentPeriodIndex];
+  const currentSegment = getCurrentSegment(currentPeriod);
+
+  if (currentSegment) {
+    const segmentEnd = toSeconds(currentSegment.end);
+    const secondsLeftInSegment = segmentEnd - nowSeconds;
+    scheduleTimerEl.textContent = `${currentSegment.label} ends in ${formatCountdown(secondsLeftInSegment)}.`;
+    return;
+  }
+
+  const periodEnd = toSeconds(currentPeriod.end);
+  const secondsLeftInPeriod = periodEnd - nowSeconds;
+  scheduleTimerEl.textContent = `${currentPeriod.label} ends in ${formatCountdown(secondsLeftInPeriod)}.`;
+}
+
+function updateClock() {
+  const now = new Date();
+  clockEl.textContent = now.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', second: '2-digit' });
+  dateEl.textContent = now.toLocaleDateString([], { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+function loadResources() {
+  const saved = localStorage.getItem('teachingDashboardResources');
+  if (!saved) return defaultResources;
+  try {
+    const parsed = JSON.parse(saved);
+    return Array.isArray(parsed) && parsed.length ? parsed : defaultResources;
+  } catch {
+    return defaultResources;
+  }
+}
+
+function saveResources() {
+  localStorage.setItem('teachingDashboardResources', JSON.stringify(resources));
+}
+
+function selectSite(site) {
+  activeSite = site;
+  siteFrame.src = site.url;
+  openExternal.href = site.url;
+  openExternal.textContent = `Open ${site.label} in new tab`;
+  document.querySelectorAll('.resource-btn').forEach((button) => {
+    button.classList.toggle('active', button.dataset.url === site.url);
+  });
+}
+
+function renderResourceButtons() {
+  resourceButtons.innerHTML = '';
+  resources.forEach((site) => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'resource-btn';
+    button.dataset.url = site.url;
+    button.textContent = site.label;
+    button.addEventListener('click', () => selectSite(site));
+    resourceButtons.appendChild(button);
+  });
+  if (activeSite) selectSite(activeSite);
+}
+
+function ensureAudioContext() {
+  if (!audioContext) {
+    audioContext = new AudioContext();
+  }
+  if (audioContext.state === 'suspended') {
+    audioContext.resume();
+  }
+}
+
+function scheduleLofiBar(startAt) {
+  const chords = [
+    [220, 261.63, 329.63],
+    [196, 246.94, 329.63],
+    [174.61, 220, 293.66],
+    [196, 233.08, 293.66]
+  ];
+  let cursor = startAt;
+  chords.forEach((chord) => {
+    chord.forEach((freq) => {
+      const osc = audioContext.createOscillator();
+      const gain = audioContext.createGain();
+      const wobble = audioContext.createOscillator();
+      const wobbleGain = audioContext.createGain();
+
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(freq, cursor);
+
+      wobble.type = 'sine';
+      wobble.frequency.setValueAtTime(1.7, cursor);
+      wobbleGain.gain.setValueAtTime(0.7, cursor);
+      wobble.connect(wobbleGain);
+      wobbleGain.connect(osc.frequency);
+
+      gain.gain.setValueAtTime(0.0001, cursor);
+      gain.gain.exponentialRampToValueAtTime(0.06, cursor + 0.35);
+      gain.gain.exponentialRampToValueAtTime(0.04, cursor + 3.3);
+      gain.gain.exponentialRampToValueAtTime(0.0001, cursor + 4);
+
+      osc.connect(gain);
+      gain.connect(lofiMasterGain);
+      osc.start(cursor);
+      wobble.start(cursor);
+      osc.stop(cursor + 4);
+      wobble.stop(cursor + 4);
+    });
+
+    const hiss = audioContext.createBufferSource();
+    const hissGain = audioContext.createGain();
+    const length = audioContext.sampleRate * 4;
+    const noiseBuffer = audioContext.createBuffer(1, length, audioContext.sampleRate);
+    const data = noiseBuffer.getChannelData(0);
+    for (let i = 0; i < length; i += 1) {
+      data[i] = (Math.random() * 2 - 1) * 0.03;
+    }
+    hiss.buffer = noiseBuffer;
+    hissGain.gain.value = 0.12;
+    hiss.connect(hissGain);
+    hissGain.connect(lofiMasterGain);
+    hiss.start(cursor);
+    hiss.stop(cursor + 4);
+
+    cursor += 4;
+  });
+}
+
+function startLofi() {
+  ensureAudioContext();
+  if (!lofiMasterGain) {
+    lofiMasterGain = audioContext.createGain();
+    lofiMasterGain.gain.value = 0.22;
+    lofiMasterGain.connect(audioContext.destination);
+  }
+  if (lofiIsOn) return;
+  lofiIsOn = true;
+  const now = audioContext.currentTime + 0.05;
+  scheduleLofiBar(now);
+  lofiIntervalId = setInterval(() => {
+    scheduleLofiBar(audioContext.currentTime + 0.08);
+  }, 16000);
+  lofiToggleButton.textContent = 'Turn lofi off';
+  lofiStatusEl.textContent = 'Lofi is on.';
+}
+
+function stopLofi() {
+  if (!lofiIsOn) return;
+  lofiIsOn = false;
+  clearInterval(lofiIntervalId);
+  lofiIntervalId = null;
+  if (lofiMasterGain && audioContext) {
+    lofiMasterGain.gain.cancelScheduledValues(audioContext.currentTime);
+    lofiMasterGain.gain.setTargetAtTime(0.0001, audioContext.currentTime, 0.08);
+  }
+  lofiToggleButton.textContent = 'Turn lofi on';
+  lofiStatusEl.textContent = 'Lofi is off.';
+}
+
+function formatTimerDisplay(totalSeconds) {
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+}
+
+function playTimerDoneSound() {
+  ensureAudioContext();
+  const notes = [523.25, 659.25, 783.99];
+  notes.forEach((freq, index) => {
+    const start = audioContext.currentTime + (index * 0.18);
+    const osc = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(freq, start);
+    gain.gain.setValueAtTime(0.0001, start);
+    gain.gain.exponentialRampToValueAtTime(0.35, start + 0.03);
+    gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.25);
+    osc.connect(gain);
+    gain.connect(audioContext.destination);
+    osc.start(start);
+    osc.stop(start + 0.28);
+  });
+}
+
+function syncTimerDisplay() {
+  timerDisplayEl.textContent = formatTimerDisplay(remainingSeconds);
+}
+
+function startTimer() {
+  if (timerIsRunning) return;
+  const selectedMinutes = Number(timerDurationSelect.value) || 3;
+  if (remainingSeconds <= 0 || remainingSeconds !== selectedMinutes * 60) {
+    remainingSeconds = selectedMinutes * 60;
+  }
+
+  timerIsRunning = true;
+  timerEndTimestamp = Date.now() + (remainingSeconds * 1000);
+  timerStartButton.textContent = 'Running...';
+  timerStatusEl.textContent = `Timer running for ${Math.ceil(remainingSeconds / 60)} minute(s).`;
+
+  timerIntervalId = setInterval(() => {
+    const msLeft = timerEndTimestamp - Date.now();
+    remainingSeconds = Math.max(0, Math.ceil(msLeft / 1000));
+    syncTimerDisplay();
+    if (remainingSeconds <= 0) {
+      clearInterval(timerIntervalId);
+      timerIsRunning = false;
+      timerStartButton.textContent = 'Start';
+      timerStatusEl.textContent = 'Time is up!';
+      playTimerDoneSound();
+    }
+  }, 250);
+}
+
+function resetTimer() {
+  clearInterval(timerIntervalId);
+  timerIntervalId = null;
+  timerIsRunning = false;
+  remainingSeconds = (Number(timerDurationSelect.value) || 3) * 60;
+  timerStartButton.textContent = 'Start';
+  timerStatusEl.textContent = 'Ready to start.';
+  syncTimerDisplay();
+}
+
+resourceForm.addEventListener('submit', (event) => {
+  event.preventDefault();
+  const label = siteLabelInput.value.trim();
+  const url = siteUrlInput.value.trim();
+  if (!label || !url) return;
+  const normalizedUrl = url.startsWith('http://') || url.startsWith('https://') ? url : `https://${url}`;
+  resources.push({ label, url: normalizedUrl });
+  saveResources();
+  renderResourceButtons();
+  selectSite({ label, url: normalizedUrl });
+  resourceForm.reset();
+});
+
+modeSelect.addEventListener('change', renderSchedule);
+trackSelect.addEventListener('change', renderSchedule);
+lofiToggleButton.addEventListener('click', () => {
+  if (lofiIsOn) {
+    stopLofi();
+  } else {
+    startLofi();
+  }
+});
+timerStartButton.addEventListener('click', startTimer);
+timerResetButton.addEventListener('click', resetTimer);
+timerDurationSelect.addEventListener('change', () => {
+  if (!timerIsRunning) {
+    remainingSeconds = Number(timerDurationSelect.value) * 60;
+    syncTimerDisplay();
+  }
+});
+
+updateClock();
+renderSchedule();
+renderResourceButtons();
+syncTimerDisplay();
+setInterval(() => {
+  updateClock();
+  renderSchedule();
+}, 1000);

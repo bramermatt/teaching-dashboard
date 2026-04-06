@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Teaching Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="container">
+    <header class="topbar">
+      <div>
+        <h1>Teaching Dashboard</h1>
+        <p class="sub">Live schedule + bathroom rules + quick links in one place.</p>
+      </div>
+      <div class="clock-wrap">
+        <p id="todayDate" class="meta"></p>
+        <p id="liveClock" class="clock"></p>
+        <p id="nowStatus" class="meta"></p>
+      </div>
+    </header>
+
+    <section class="panel">
+      <div class="panel-head">
+        <h2>Bell Schedule</h2>
+        <p id="scheduleTimer" class="meta">Loading live timer...</p>
+      </div>
+
+      <div class="controls">
+        <label>
+          Day Type
+          <select id="scheduleMode">
+            <option value="regular">Regular Day</option>
+            <option value="delay">2-Hour Delay</option>
+          </select>
+        </label>
+        <label>
+          Period 4 Assignment
+          <select id="period4Track">
+            <option value="A">A Lunch</option>
+            <option value="B">B Lunch</option>
+            <option value="C">C Lunch</option>
+            <option value="PLANNING">My Planning</option>
+          </select>
+        </label>
+      </div>
+
+      <div id="schedule" class="schedule"></div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <h2>Focus Tools</h2>
+        <p class="sub small">Toggle background lofi and run a class timer with an ending sound.</p>
+      </div>
+
+      <div class="focus-tools">
+        <div class="focus-card">
+          <h3>Lofi Music</h3>
+          <p class="sub small">Warm background loop for independent work time.</p>
+          <button id="lofiToggle" type="button" class="primary-btn">Turn lofi on</button>
+          <p id="lofiStatus" class="meta">Lofi is off.</p>
+        </div>
+
+        <div class="focus-card">
+          <h3>Timer</h3>
+          <p class="sub small">Default is 3 minutes, with quick duration choices.</p>
+          <div class="timer-controls">
+            <label>
+              Duration
+              <select id="timerDuration">
+                <option value="1">1 min</option>
+                <option value="2">2 min</option>
+                <option value="3" selected>3 min</option>
+                <option value="5">5 min</option>
+                <option value="10">10 min</option>
+              </select>
+            </label>
+            <div class="timer-actions">
+              <button id="timerStart" type="button" class="primary-btn">Start</button>
+              <button id="timerReset" type="button">Reset</button>
+            </div>
+          </div>
+          <p id="timerDisplay" class="timer-display">03:00</p>
+          <p id="timerStatus" class="meta">Ready to start.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <h2>Teaching Sites</h2>
+        <p class="sub small">Some websites block iframes; use "Open in new tab" if needed.</p>
+      </div>
+
+      <div class="resources-row">
+        <div id="resourceButtons" class="resource-buttons"></div>
+      </div>
+
+      <form id="resourceForm" class="resource-form">
+        <input id="siteLabel" type="text" placeholder="Site name (e.g., Gradebook)" required>
+        <input id="siteUrl" type="url" placeholder="https://example.com" required>
+        <button type="submit">Add Quick Link</button>
+      </form>
+
+      <div class="iframe-actions">
+        <a id="openExternal" href="#" target="_blank" rel="noopener noreferrer">Open in new tab</a>
+      </div>
+      <div class="iframe-shell">
+        <iframe id="siteFrame" title="Teaching site"></iframe>
+      </div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
