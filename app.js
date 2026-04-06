@@ -75,9 +75,6 @@ const period4Tracks = {
   C: [
     { start: '10:15', end: '11:00', label: 'Period 4 Class (C Lunch Track)', kind: 'class' },
     { start: '11:20', end: '11:50', label: 'C Lunch', kind: 'lunch' }
-  ],
-  PLANNING: [
-    { start: '10:40', end: '11:50', label: 'My Planning', kind: 'planning' }
   ]
 };
 
@@ -91,25 +88,14 @@ const delaySchedule = [
   { label: 'Period 7', start: '13:55', end: '14:20', segments: [{ start: '13:55', end: '14:20', label: 'Class Block', kind: 'class' }] }
 ];
 
-const defaultResources = [
-  { label: 'LMS', url: 'https://classroom.google.com' },
-  { label: 'Gradebook', url: 'https://www.powerschool.com' },
-  { label: 'Slides', url: 'https://docs.google.com/presentation' }
-];
-
 const scheduleContainer = document.getElementById('schedule');
 const modeSelect = document.getElementById('scheduleMode');
 const trackSelect = document.getElementById('period4Track');
+const planningPeriodSelect = document.getElementById('planningPeriod');
 const clockEl = document.getElementById('liveClock');
 const dateEl = document.getElementById('todayDate');
 const statusEl = document.getElementById('nowStatus');
 const scheduleTimerEl = document.getElementById('scheduleTimer');
-const resourceButtons = document.getElementById('resourceButtons');
-const resourceForm = document.getElementById('resourceForm');
-const siteLabelInput = document.getElementById('siteLabel');
-const siteUrlInput = document.getElementById('siteUrl');
-const siteFrame = document.getElementById('siteFrame');
-const openExternal = document.getElementById('openExternal');
 const lofiToggleButton = document.getElementById('lofiToggle');
 const lofiStatusEl = document.getElementById('lofiStatus');
 const timerDurationSelect = document.getElementById('timerDuration');
@@ -118,8 +104,6 @@ const timerResetButton = document.getElementById('timerReset');
 const timerDisplayEl = document.getElementById('timerDisplay');
 const timerStatusEl = document.getElementById('timerStatus');
 
-let resources = loadResources();
-let activeSite = resources[0];
 let audioContext;
 let lofiMasterGain;
 let lofiIntervalId;
@@ -128,6 +112,8 @@ let timerIntervalId;
 let timerEndTimestamp;
 let remainingSeconds = 180;
 let timerIsRunning = false;
+
+initializeScheduleSettings();
 
 function toMinutes(hhmm) {
   const [hours, minutes] = hhmm.split(':').map(Number);
@@ -168,7 +154,23 @@ function formatCountdown(totalSeconds) {
 }
 
 function buildRegularSchedule() {
+  const selectedPlanning = planningPeriodSelect.value;
+
   return regularPeriods.map((period) => {
+    if (period.label === selectedPlanning) {
+      return {
+        ...period,
+        segments: [
+          {
+            start: period.start,
+            end: period.end,
+            label: 'My Planning',
+            kind: 'planning'
+          }
+        ]
+      };
+    }
+
     if (period.label !== 'Period 4') return period;
     return { ...period, segments: period4Tracks[trackSelect.value] };
   });
@@ -294,43 +296,26 @@ function updateClock() {
   dateEl.textContent = now.toLocaleDateString([], { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' });
 }
 
-function loadResources() {
-  const saved = localStorage.getItem('teachingDashboardResources');
-  if (!saved) return defaultResources;
-  try {
-    const parsed = JSON.parse(saved);
-    return Array.isArray(parsed) && parsed.length ? parsed : defaultResources;
-  } catch {
-    return defaultResources;
+function initializeScheduleSettings() {
+  const savedMode = localStorage.getItem('teachingDashboardDayType');
+  const savedTrack = localStorage.getItem('teachingDashboardPeriod4Track');
+  const savedPlanning = localStorage.getItem('teachingDashboardPlanningPeriod');
+
+  if (savedMode && [...modeSelect.options].some((option) => option.value === savedMode)) {
+    modeSelect.value = savedMode;
+  }
+  if (savedTrack && [...trackSelect.options].some((option) => option.value === savedTrack)) {
+    trackSelect.value = savedTrack;
+  }
+  if (savedPlanning && [...planningPeriodSelect.options].some((option) => option.value === savedPlanning)) {
+    planningPeriodSelect.value = savedPlanning;
   }
 }
 
-function saveResources() {
-  localStorage.setItem('teachingDashboardResources', JSON.stringify(resources));
-}
-
-function selectSite(site) {
-  activeSite = site;
-  siteFrame.src = site.url;
-  openExternal.href = site.url;
-  openExternal.textContent = `Open ${site.label} in new tab`;
-  document.querySelectorAll('.resource-btn').forEach((button) => {
-    button.classList.toggle('active', button.dataset.url === site.url);
-  });
-}
-
-function renderResourceButtons() {
-  resourceButtons.innerHTML = '';
-  resources.forEach((site) => {
-    const button = document.createElement('button');
-    button.type = 'button';
-    button.className = 'resource-btn';
-    button.dataset.url = site.url;
-    button.textContent = site.label;
-    button.addEventListener('click', () => selectSite(site));
-    resourceButtons.appendChild(button);
-  });
-  if (activeSite) selectSite(activeSite);
+function saveScheduleSettings() {
+  localStorage.setItem('teachingDashboardDayType', modeSelect.value);
+  localStorage.setItem('teachingDashboardPeriod4Track', trackSelect.value);
+  localStorage.setItem('teachingDashboardPlanningPeriod', planningPeriodSelect.value);
 }
 
 function ensureAudioContext() {
@@ -494,21 +479,18 @@ function resetTimer() {
   syncTimerDisplay();
 }
 
-resourceForm.addEventListener('submit', (event) => {
-  event.preventDefault();
-  const label = siteLabelInput.value.trim();
-  const url = siteUrlInput.value.trim();
-  if (!label || !url) return;
-  const normalizedUrl = url.startsWith('http://') || url.startsWith('https://') ? url : `https://${url}`;
-  resources.push({ label, url: normalizedUrl });
-  saveResources();
-  renderResourceButtons();
-  selectSite({ label, url: normalizedUrl });
-  resourceForm.reset();
+modeSelect.addEventListener('change', () => {
+  saveScheduleSettings();
+  renderSchedule();
 });
-
-modeSelect.addEventListener('change', renderSchedule);
-trackSelect.addEventListener('change', renderSchedule);
+trackSelect.addEventListener('change', () => {
+  saveScheduleSettings();
+  renderSchedule();
+});
+planningPeriodSelect.addEventListener('change', () => {
+  saveScheduleSettings();
+  renderSchedule();
+});
 lofiToggleButton.addEventListener('click', () => {
   if (lofiIsOn) {
     stopLofi();
@@ -527,7 +509,6 @@ timerDurationSelect.addEventListener('change', () => {
 
 updateClock();
 renderSchedule();
-renderResourceButtons();
 syncTimerDisplay();
 setInterval(() => {
   updateClock();
