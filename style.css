@@ -128,7 +128,7 @@ h1, h2, p {
 
 .controls {
   display: grid;
-  grid-template-columns: repeat(2, minmax(180px, 280px));
+  grid-template-columns: repeat(3, minmax(180px, 280px));
   gap: 0.7rem;
   margin-bottom: 0.85rem;
 }
@@ -242,73 +242,6 @@ h1, h2, p {
   border-top: 1px dashed #93c5fd;
 }
 
-.resources-row {
-  margin-bottom: 0.8rem;
-}
-
-.resource-buttons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-.resource-btn,
-.resource-form button {
-  border: none;
-  border-radius: 10px;
-  padding: 0.55rem 0.8rem;
-  background: #e5e7eb;
-  cursor: pointer;
-  font-weight: 600;
-}
-
-.resource-btn.active {
-  background: #2563eb;
-  color: white;
-}
-
-.resource-form {
-  display: grid;
-  grid-template-columns: 1fr 2fr auto;
-  gap: 0.55rem;
-  margin-bottom: 0.8rem;
-}
-
-.resource-form input {
-  padding: 0.6rem;
-  border-radius: 10px;
-  border: 1px solid #d1d5db;
-}
-
-.resource-form button {
-  background: #2563eb;
-  color: white;
-}
-
-.iframe-actions {
-  margin-bottom: 0.45rem;
-}
-
-.iframe-actions a {
-  color: #2563eb;
-  font-weight: 600;
-  text-decoration: none;
-}
-
-.iframe-shell {
-  height: 60vh;
-  border: 1px solid #d1d5db;
-  border-radius: 12px;
-  overflow: hidden;
-}
-
-iframe {
-  width: 100%;
-  height: 100%;
-  border: none;
-  background: #f9fafb;
-}
-
 @media (max-width: 900px) {
   .topbar {
     flex-direction: column;
@@ -321,7 +254,6 @@ iframe {
   }
 
   .controls,
-  .resource-form,
   .focus-tools {
     grid-template-columns: 1fr;
   }
@@ -340,7 +272,7 @@ iframe {
   }
 
   .topbar,
-  .panel:last-of-type {
+  .panel {
     grid-column: 1 / -1;
   }
 }
