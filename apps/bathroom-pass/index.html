@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bathroom Pass</title>
+  <script>
+    const myConfig = {
+      teacherTitle: "Mr. Bramer's Bathroom Pass",
+      planningLabel: 'Period 4',
+      periodOrder: ['Period 1', 'Period 2', 'Period 3', 'Period 5', 'Period 6', 'Period 7'],
+      regularSchedule: [
+        { label: 'Period 1', start: '07:45', end: '08:30' },
+        { label: 'Period 2', start: '08:35', end: '09:20' },
+        { label: 'Period 3', start: '09:25', end: '10:10' },
+        { label: 'Period 4', start: '10:15', end: '11:50' },
+        { label: 'Period 5', start: '11:55', end: '12:40' },
+        { label: 'Period 6', start: '12:45', end: '13:30' },
+        { label: 'Period 7', start: '13:35', end: '14:20' }
+      ],
+      rosters: {
+        "Period 1": [
+          "Beason, Kyrell","Blevins, Faith","Bringham, Nathaniel","Buckner, Bevyn","Carson, Cash","Cruz Lemus, Katya","Damian, Miguel","Dansby, Sean","Fountain, Akeelah","Guadalupe Flores, Alexis","Hatton, Cayden","Haymer, Ki'Avoni","Hightower, Austin","Jordan, Mariah","LaMaster, Mason","Morales, Landon","PadillaThornton, Zachariah","Palemon, Luis","Patrick, Micah","Richardson, Steven","Riddlespriger, Marley","Santana, Jason","Segebart, Chasity","Sharpnack, Alissa","Vowell, Layla"
+        ],
+        "Period 2": [
+          "Booker, Milana","Burnell, Logan","Chavez Morales, Alfredo","Durbin, Blake","Fountain, Isaac","Garner, Marquel","Hargett, Easton","Haskins, Caelan","Hernandez, Myshielis","Holman, Chase","Lewis, Ava","Magallon, Heily","Miller, Bryson","Napier, Braylen","Pasley, Elijah","Rojas, Jovanny","Santillan, Emiliano","Shircliff, Madelyn","Stephens, Rowaan","Williams, Anjalese","Wilson, Tristin"
+        ],
+        "Period 3": [
+          "Alokoa, Kobesasi-Ismael","Alvarenga, Haylee","Asare, Kingsley","Beckam, Jackson","Early, Samson","Escobar, Jacqueline","Liles, Aminah","Linthicome, Deontae","Miller, Christian","Pulliam, Kenzie","Reed, Terrain","Rubio, Adair","Sparkman, Noah","Wilson, Ty'Tianna",
+          "Bobo, Luke","Brown, Brandon","Buckner, Stephen","Conner, Kingston","Fountain, Elijah","Fulkerson, Melody","Greenwade, Jeremiah","Ortiz, Christopher","Parker, Raina","Payne, Jaden","Rozier, Michael","Schilling, Kenshawn"
+        ],
+        "Period 5": [
+          "Blevins, Miah","Campos Juarez, Brandon","Dunn, Ari'hya","Gonzalez Rojas, Misael","Greene, Shane","Hernandez Suarez, Santiago","Hicks, Makenzie","Jimenez Hidalgo, Camila","Johnson, Tyren","Jordan, Amiyah","Middleton, Arayiah","Moore, Ayedenn","Newson, Justice","Ricketts, Aiden","Rosas, Rhianna","Smith, Ja'Rayah","Wagner, Aaliyah","Washington, Kori","Wright, Dyamon",
+          "Alvarado, Kayleen","Baker, Jeremy","Bratcher, Isaiah","Claros Ramos, Loany","Crosby, Kobe","Eldridge, Madison","Forrest, Jackson","Gaytan, Alistair","Gleitz, Christian","Harper, Kaylee","Hatcher-Daniel, Jae'shaun","Martin, Kaniel","Misic, Aiden","Smith, Ariana","Smith, Spencer","Wickliffe, Tytionna"
+        ],
+        "Period 6": [
+          "Amos, Skylan","Anderson, Alyssa","Baggett, Yorel","Brown, Autumn","Brown, Sariya","Coates, Andrew","Cross, Yanaija","Dunn, Samuel","Kannamore-Carter, Ra'janae","Maniloff, Georgia","Marshall, Maya","Medrano, Lygaci","Moorman, Dionna","Nash, Mekhi","Parham, Symphony","Pena, Daylin","Shelton, Arion","Thomas, Ja'Miracle","Thompson, Lorenzo"
+        ],
+        "Period 7": [
+          "Alvarez Madrid, Luis","Bailey, Breanna","Benn, Mya","Britto, Emery","Cannon, Evan","Copas, Stephanie","Culver, Chase","Delgado, Isaac","Eppler, Robert","Gary, Nevaeh","Gruver, Michael","Hinkle, Aria","Jones, Chloe","Jones-Turner, Reno","Pena Canseco, Jose","Ross, Baylee","Santana, Jeiran","Santos, Edgar","Young, Braylen",
+          "Black, Arianna","Brown, Riyhlen","Conde, Eli","Ellery, Detrick","Finch, Brycen","Humphreys, Rylan","Mills, Andrew","Piccuito, Hannah","Spaulding, Easton","Vazquez, Fidel"
+        ]
+      }
+    };
+
+    const teacherId = 'mr-bramer';
+    localStorage.setItem(`bathroom-break-config-${teacherId}`, JSON.stringify(myConfig));
+    const passthroughParams = new URLSearchParams(window.location.search);
+    if (!passthroughParams.get('teacher')) passthroughParams.set('teacher', teacherId);
+    const hash = window.location.hash || '';
+    window.location.replace(`./bathroomPass.html?${passthroughParams.toString()}${hash}`);
+  </script>
+</head>
+<body></body>
+</html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bathroom Break Tracker</title>
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    integrity="sha512-SnH5WK+bZxgPHs44uWix+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkR4j8YdLJgyAHIhR35VZc2oM/gI1wP4R5nQ=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"
+  />
+  <style>
+    :root {
+      --bg: #f3f6fb;
+      --panel: #ffffff;
+      --text: #10223b;
+      --muted: #5f718a;
+      --accent: #2a6df4;
+      --accent-soft: #e8f0ff;
+      --danger: #d94444;
+      --warning: #ffb020;
+      --ok: #1a9b5f;
+      --ring: 0 0 0 3px rgba(42, 109, 244, 0.2);
+      --radius: 14px;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      overflow: auto;
+    }
+
+    .app {
+      max-width: 1300px;
+      margin: 0 auto;
+      padding: 20px;
+      display: grid;
+      gap: 16px;
+      min-height: 100vh;
+    }
+
+    .panel {
+      background: var(--panel);
+      border-radius: var(--radius);
+      box-shadow: 0 10px 30px rgba(16, 34, 59, 0.08);
+      padding: 16px;
+    }
+
+    h1, h2, h3, p { margin: 0; }
+
+    .top {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 16px;
+    }
+
+    .top-left {
+      display: grid;
+      gap: 10px;
+    }
+
+    .subtle { color: var(--muted); font-size: 0.95rem; }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: end;
+    }
+
+    .field { display: grid; gap: 6px; min-width: 170px; }
+    .field label { font-size: 0.85rem; color: var(--muted); }
+
+    select, input, textarea, button {
+      border-radius: 10px;
+      border: 1px solid #d9e3f2;
+      padding: 9px 10px;
+      font-size: 0.95rem;
+      background: #fff;
+      color: var(--text);
+    }
+
+    select:focus, input:focus, textarea:focus, button:focus { outline: none; box-shadow: var(--ring); }
+
+    button {
+      cursor: pointer;
+      border: none;
+      background: var(--accent);
+      color: #fff;
+      font-weight: 600;
+    }
+
+    button.secondary { background: #e6edfb; color: #23447f; }
+    button.danger { background: var(--danger); }
+    button.success { background: var(--ok); }
+
+    .period-pill {
+      background: var(--accent-soft);
+      border: 1px solid #c8dbff;
+      color: #1d4dab;
+      border-radius: 999px;
+      padding: 8px 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 600;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .stat {
+      background: #f8fbff;
+      border-radius: 10px;
+      border: 1px solid #e4efff;
+      padding: 10px;
+    }
+    .stat .label { font-size: 0.8rem; color: var(--muted); }
+    .stat .value { font-size: 1.2rem; font-weight: 700; }
+
+    .main {
+      display: grid;
+      grid-template-columns: 1.2fr 0.9fr;
+      gap: 16px;
+      align-items: start;
+      min-height: 0;
+    }
+
+    .main > .panel, .live > .panel { min-height: 0; }
+
+    .student-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+      gap: 10px;
+      margin-top: 12px;
+      max-height: 470px;
+      overflow: auto;
+      padding-right: 4px;
+    }
+
+    .student {
+      border: 1px solid #dce8ff;
+      background: #f6f9ff;
+      border-radius: 10px;
+      padding: 10px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .student .name { font-weight: 650; font-size: 0.95rem; }
+    .student.disabled {
+      background: #f0f2f6;
+      border-color: #dde2ea;
+      opacity: 0.78;
+    }
+    .student button:disabled {
+      background: #a5acb8;
+      cursor: not-allowed;
+    }
+    .chip {
+      display: inline-block;
+      padding: 3px 7px;
+      font-size: 0.75rem;
+      border-radius: 999px;
+      background: #eaf0fa;
+      color: #264167;
+      margin-right: 4px;
+    }
+
+    .live {
+      display: grid;
+      gap: 10px;
+    }
+    .queue-list {
+      display: grid;
+      gap: 8px;
+      margin-top: 10px;
+      max-height: 170px;
+      overflow: auto;
+    }
+    .queue-item {
+      border: 1px solid #dce8ff;
+      background: #f6f9ff;
+      border-radius: 10px;
+      padding: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .queue-item .left {
+      min-width: 0;
+    }
+    .queue-item .left strong {
+      display: block;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .queue-item .left small { color: var(--muted); }
+    .queue-item .actions { display: flex; gap: 6px; }
+    .queue-item .actions button { padding: 6px 8px; font-size: 0.82rem; display:flex; align-items:center; gap:6px; }
+
+    .out-card {
+      border: 1px solid #ffd9d9;
+      background: #fff7f7;
+      border-radius: 12px;
+      padding: 12px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .timer {
+      font-size: 1.8rem;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+    }
+
+    .late { color: var(--danger); }
+    .on-time { color: #244a84; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+
+    th, td {
+      border-bottom: 1px solid #e8edf8;
+      padding: 8px 6px;
+      text-align: left;
+    }
+
+    th { color: var(--muted); font-weight: 600; font-size: 0.8rem; }
+
+    .history-wrap { max-height: 180px; overflow: auto; margin-top: 8px; }
+
+    .warn {
+      color: #8a5a00;
+      background: #fff6df;
+      border: 1px solid #ffe1a1;
+      border-radius: 10px;
+      padding: 9px;
+      font-size: 0.86rem;
+    }
+
+    details summary { cursor: pointer; font-weight: 600; }
+
+    @media (max-width: 1050px) {
+      .top, .main { grid-template-columns: 1fr; }
+      .student-grid { max-height: none; height: auto; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <section class="panel top">
+      <div class="top-left">
+        <h1>Bathroom Break Tracker</h1>
+        <p class="subtle">Click a student to send them to RR. Click <strong>Mark Returned</strong> when they come back.</p>
+
+        <div class="controls">
+          <div class="field">
+            <label for="scheduleMode">Schedule</label>
+            <select id="scheduleMode">
+              <option value="regular">Regular Bell Schedule</option>
+              <option value="alternate">Current / Alternate Schedule</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="periodSelect">Manual Period Override</label>
+            <select id="periodSelect"></select>
+          </div>
+
+          <div class="field">
+            <label for="maxMinutes">Late After (minutes)</label>
+            <input id="maxMinutes" type="number" min="1" max="30" value="5" />
+          </div>
+
+          <button id="clearPeriod" class="danger">Reset This Period Data</button>
+          <button id="toggleSchedulePanel" class="secondary">Show Alternate Schedule</button>
+        </div>
+
+        <div class="period-pill" id="periodPill"></div>
+      </div>
+
+      <div>
+        <h3>Today</h3>
+        <p class="subtle" id="todayDate"></p>
+        <div class="stats">
+          <div class="stat">
+            <div class="label">Current Period Trips</div>
+            <div class="value" id="periodTrips">0</div>
+          </div>
+          <div class="stat">
+            <div class="label">Out Right Now</div>
+            <div class="value" id="outNow">0</div>
+          </div>
+          <div class="stat">
+            <div class="label">Total Logged Today</div>
+            <div class="value" id="allTrips">0</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" id="schedulePanel" style="display:none;">
+        <h3>Alternate Schedule Editor (for your second copy/current schedule)</h3>
+        <p class="subtle" style="margin:8px 0;">Use HH:MM 24-hour format. Example: 08:05. Period 4 is planning only and not tracked.</p>
+        <textarea id="alternateEditor" rows="8" style="width:100%; margin-top:8px;"></textarea>
+        <div style="margin-top:8px; display:flex; gap:8px; flex-wrap: wrap;">
+          <button id="saveAlternate" class="success">Save Alternate Schedule</button>
+          <button id="resetAlternate" class="secondary">Reset Alternate to Default</button>
+        </div>
+    </section>
+
+    <section class="main">
+      <div class="panel">
+        <div class="controls" style="justify-content:space-between; align-items:center;">
+          <h2>Students</h2>
+          <div class="field" style="min-width:220px;">
+            <label for="studentSearch">Search</label>
+            <input id="studentSearch" placeholder="Type a student name" />
+          </div>
+        </div>
+        <p class="warn" id="leaveWindowMsg" style="margin-top:10px; display:none;"></p>
+        <div class="student-grid" id="studentGrid"></div>
+      </div>
+
+      <div class="live">
+        <section class="panel">
+          <h2>Requests</h2>
+          <div id="requestsContainer" class="queue-list"></div>
+        </section>
+
+        <section class="panel">
+          <h2>On Deck</h2>
+          <div id="onDeckContainer" class="queue-list"></div>
+        </section>
+
+        <section class="panel">
+          <h2>Currently Out</h2>
+          <div id="outContainer" style="margin-top:10px;"></div>
+          <p class="warn" id="singleOutMsg" style="margin-top:10px; display:none;">Only one student can be out at a time.</p>
+        </section>
+
+        <section class="panel">
+          <h2>Recent History (Current Period)</h2>
+          <div class="history-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Student</th>
+                  <th>Out</th>
+                  <th>Back</th>
+                  <th>Duration</th>
+                </tr>
+              </thead>
+              <tbody id="historyBody"></tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const PERIOD_ORDER = ["Period 1", "Period 2", "Period 3", "Period 5", "Period 6", "Period 7"];
+    const PLANNING_LABEL = "Planning";
+
+    const regularSchedule = [
+      { label: 'Period 1', start: '07:45', end: '08:30' },
+      { label: 'Period 2', start: '08:35', end: '09:20' },
+      { label: 'Period 3', start: '09:25', end: '10:10' },
+      { label: PLANNING_LABEL, start: '10:15', end: '11:50' },
+      { label: 'Period 5', start: '11:55', end: '12:40' },
+      { label: 'Period 6', start: '12:45', end: '13:30' },
+      { label: 'Period 7', start: '13:35', end: '14:20' }
+    ];
+
+    const defaultAlternateSchedule = JSON.parse(JSON.stringify(regularSchedule));
+
+    const rosters = {
+      "Period 1": [
+        "Beason, Kyrell","Blevins, Faith","Bringham, Nathaniel","Buckner, Bevyn","Carson, Cash","Cruz Lemus, Katya","Damian, Miguel","Dansby, Sean","Fountain, Akeelah","Guadalupe Flores, Alexis","Hatton, Cayden","Haymer, Ki'Avoni","Hightower, Austin","Jordan, Mariah","LaMaster, Mason","Morales, Landon","PadillaThornton, Zachariah","Palemon, Luis","Patrick, Micah","Richardson, Steven","Riddlespriger, Marley","Santana, Jason","Segebart, Chasity","Sharpnack, Alissa","Vowell, Layla"
+      ],
+      "Period 2": [
+        "Booker, Milana","Burnell, Logan","Chavez Morales, Alfredo","Durbin, Blake","Fountain, Isaac","Garner, Marquel","Hargett, Easton","Haskins, Caelan","Hernandez, Myshielis","Holman, Chase","Lewis, Ava","Magallon, Heily","Miller, Bryson","Napier, Braylen","Pasley, Elijah","Rojas, Jovanny","Santillan, Emiliano","Shircliff, Madelyn","Stephens, Rowaan","Williams, Anjalese","Wilson, Tristin"
+      ],
+      "Period 3": [
+        "Alokoa, Kobesasi-Ismael","Alvarenga, Haylee","Asare, Kingsley","Beckam, Jackson","Early, Samson","Escobar, Jacqueline","Liles, Aminah","Linthicome, Deontae","Miller, Christian","Pulliam, Kenzie","Reed, Terrain","Rubio, Adair","Sparkman, Noah","Wilson, Ty'Tianna",
+        "Bobo, Luke","Brown, Brandon","Buckner, Stephen","Conner, Kingston","Fountain, Elijah","Fulkerson, Melody","Greenwade, Jeremiah","Ortiz, Christopher","Parker, Raina","Payne, Jaden","Rozier, Michael","Schilling, Kenshawn"
+      ],
+      "Period 5": [
+        "Blevins, Miah","Campos Juarez, Brandon","Dunn, Ari'hya","Gonzalez Rojas, Misael","Greene, Shane","Hernandez Suarez, Santiago","Hicks, Makenzie","Jimenez Hidalgo, Camila","Johnson, Tyren","Jordan, Amiyah","Middleton, Arayiah","Moore, Ayedenn","Newson, Justice","Ricketts, Aiden","Rosas, Rhianna","Smith, Ja'Rayah","Wagner, Aaliyah","Washington, Kori","Wright, Dyamon",
+        "Alvarado, Kayleen","Baker, Jeremy","Bratcher, Isaiah","Claros Ramos, Loany","Crosby, Kobe","Eldridge, Madison","Forrest, Jackson","Gaytan, Alistair","Gleitz, Christian","Harper, Kaylee","Hatcher-Daniel, Jae'shaun","Martin, Kaniel","Misic, Aiden","Smith, Ariana","Smith, Spencer","Wickliffe, Tytionna"
+      ],
+      "Period 6": [
+        "Amos, Skylan","Anderson, Alyssa","Baggett, Yorel","Brown, Autumn","Brown, Sariya","Coates, Andrew","Cross, Yanaija","Dunn, Samuel","Kannamore-Carter, Ra'janae","Maniloff, Georgia","Marshall, Maya","Medrano, Lygaci","Moorman, Dionna","Nash, Mekhi","Parham, Symphony","Pena, Daylin","Shelton, Arion","Thomas, Ja'Miracle","Thompson, Lorenzo"
+      ],
+      "Period 7": [
+        "Alvarez Madrid, Luis","Bailey, Breanna","Benn, Mya","Britto, Emery","Cannon, Evan","Copas, Stephanie","Culver, Chase","Delgado, Isaac","Eppler, Robert","Gary, Nevaeh","Gruver, Michael","Hinkle, Aria","Jones, Chloe","Jones-Turner, Reno","Pena Canseco, Jose","Ross, Baylee","Santana, Jeiran","Santos, Edgar","Young, Braylen",
+        "Black, Arianna","Brown, Riyhlen","Conde, Eli","Ellery, Detrick","Finch, Brycen","Humphreys, Rylan","Mills, Andrew","Piccuito, Hannah","Spaulding, Easton","Vazquez, Fidel"
+      ]
+    };
+
+    const storageKey = "bathroom-break-state-v2";
+
+    const state = loadState();
+
+    const el = {
+      todayDate: document.getElementById('todayDate'),
+      scheduleMode: document.getElementById('scheduleMode'),
+      periodSelect: document.getElementById('periodSelect'),
+      maxMinutes: document.getElementById('maxMinutes'),
+      periodPill: document.getElementById('periodPill'),
+      periodTrips: document.getElementById('periodTrips'),
+      outNow: document.getElementById('outNow'),
+      allTrips: document.getElementById('allTrips'),
+      studentSearch: document.getElementById('studentSearch'),
+      studentGrid: document.getElementById('studentGrid'),
+      requestsContainer: document.getElementById('requestsContainer'),
+      onDeckContainer: document.getElementById('onDeckContainer'),
+      outContainer: document.getElementById('outContainer'),
+      historyBody: document.getElementById('historyBody'),
+      schedulePanel: document.getElementById('schedulePanel'),
+      toggleSchedulePanel: document.getElementById('toggleSchedulePanel'),
+      leaveWindowMsg: document.getElementById('leaveWindowMsg'),
+      clearPeriod: document.getElementById('clearPeriod'),
+      singleOutMsg: document.getElementById('singleOutMsg'),
+      alternateEditor: document.getElementById('alternateEditor'),
+      saveAlternate: document.getElementById('saveAlternate'),
+      resetAlternate: document.getElementById('resetAlternate')
+    };
+
+    function loadState() {
+      const raw = localStorage.getItem(storageKey);
+      const empty = {
+        scheduleMode: 'regular',
+        selectedPeriod: 'Period 1',
+        maxMinutes: 5,
+        alternateSchedule: defaultAlternateSchedule,
+        periods: {}
+      };
+
+      PERIOD_ORDER.forEach(period => {
+        empty.periods[period] = {
+          requests: [],
+          onDeck: [],
+          out: [],
+          history: [],
+          counts: Object.fromEntries((rosters[period] || []).map(name => [name, { trips: 0, totalSeconds: 0 }]))
+        };
+      });
+
+      if (!raw) return empty;
+
+      try {
+        const parsed = JSON.parse(raw);
+        const merged = { ...empty, ...parsed };
+        PERIOD_ORDER.forEach(period => {
+          merged.periods[period] = merged.periods[period] || empty.periods[period];
+          merged.periods[period].requests = merged.periods[period].requests || [];
+          merged.periods[period].onDeck = merged.periods[period].onDeck || [];
+          merged.periods[period].counts = merged.periods[period].counts || {};
+          (rosters[period] || []).forEach(name => {
+            if (!merged.periods[period].counts[name]) {
+              merged.periods[period].counts[name] = { trips: 0, totalSeconds: 0 };
+            }
+          });
+        });
+        return merged;
+      } catch {
+        return empty;
+      }
+    }
+
+    function persist() {
+      localStorage.setItem(storageKey, JSON.stringify(state));
+    }
+
+    function toMinutes(timeString) {
+      const [h, m] = timeString.split(':').map(Number);
+      return h * 60 + m;
+    }
+
+    function nowMinutes() {
+      const d = new Date();
+      return d.getHours() * 60 + d.getMinutes();
+    }
+
+    function getSchedule() {
+      return state.scheduleMode === 'alternate' ? state.alternateSchedule : regularSchedule;
+    }
+
+    function getAutoPeriodLabel() {
+      const now = nowMinutes();
+      for (const slot of getSchedule()) {
+        const start = toMinutes(slot.start);
+        const end = toMinutes(slot.end);
+        if (now >= start && now <= end) return slot.label;
+      }
+      return 'Outside class periods';
+    }
+
+    function formatDuration(totalSeconds) {
+      if (totalSeconds < 60) return `${totalSeconds}s`;
+      const mins = Math.floor(totalSeconds / 60);
+      const secs = totalSeconds % 60;
+      return `${mins}:${String(secs).padStart(2, '0')}`;
+    }
+
+    function formatClock(ms) {
+      const d = new Date(ms);
+      return d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', second: '2-digit' });
+    }
+
+    function currentPeriodData() {
+      return state.periods[state.selectedPeriod];
+    }
+
+    function getLeaveRestrictionForSelectedPeriod() {
+      const slot = getSchedule().find(s => s.label === state.selectedPeriod);
+      if (!slot) return { blocked: false, reason: '' };
+      const now = nowMinutes();
+      const start = toMinutes(slot.start);
+      const end = toMinutes(slot.end);
+
+      if (now < start || now > end) return { blocked: false, reason: '' };
+      if (now >= start && now < start + 15) {
+        return { blocked: true, reason: 'RR is blocked during the first 15 minutes of this period.' };
+      }
+      if (now > end - 15 && now <= end) {
+        return { blocked: true, reason: 'RR is blocked during the last 15 minutes of this period.' };
+      }
+      return { blocked: false, reason: '' };
+    }
+
+    function buildPeriodSelect() {
+      el.periodSelect.innerHTML = '';
+      PERIOD_ORDER.forEach(period => {
+        const opt = document.createElement('option');
+        opt.value = period;
+        opt.textContent = period;
+        el.periodSelect.appendChild(opt);
+      });
+      el.periodSelect.value = state.selectedPeriod;
+    }
+
+    function sendStudentOut(name) {
+      const p = currentPeriodData();
+      const restriction = getLeaveRestrictionForSelectedPeriod();
+      if (restriction.blocked) {
+        alert(restriction.reason);
+        return false;
+      }
+      if (!p || p.out.length > 0) {
+        el.singleOutMsg.style.display = 'block';
+        return false;
+      }
+      el.singleOutMsg.style.display = 'none';
+      p.out.push({ name, startMs: Date.now() });
+      const record = p.counts[name] || { trips: 0, totalSeconds: 0 };
+      record.trips += 1;
+      p.counts[name] = record;
+      persist();
+      render();
+      return true;
+    }
+
+    function addRequest(name) {
+      const p = currentPeriodData();
+      if (!name || !p) return;
+      const alreadyQueued = p.requests.some(r => r.name === name) || p.onDeck.some(o => o.name === name) || p.out.some(o => o.name === name);
+      if (alreadyQueued) return;
+      p.requests.push({ name, requestedAt: Date.now() });
+      persist();
+      render();
+    }
+
+    function moveRequestToOnDeck(index) {
+      const p = currentPeriodData();
+      const [request] = p.requests.splice(index, 1);
+      if (!request) return;
+      p.onDeck.push({ name: request.name, requestedAt: request.requestedAt, addedToDeckAt: Date.now() });
+      persist();
+      render();
+    }
+
+    function removeRequest(index) {
+      const p = currentPeriodData();
+      p.requests.splice(index, 1);
+      persist();
+      render();
+    }
+
+    function sendOnDeckToOut(index) {
+      const p = currentPeriodData();
+      const student = p.onDeck[index];
+      if (!student) return;
+      const sent = sendStudentOut(student.name);
+      if (sent) {
+        p.onDeck.splice(index, 1);
+        persist();
+        render();
+      }
+    }
+
+    function removeOnDeck(index) {
+      const p = currentPeriodData();
+      p.onDeck.splice(index, 1);
+      persist();
+      render();
+    }
+
+    function markReturned(index) {
+      const p = currentPeriodData();
+      const [entry] = p.out.splice(index, 1);
+      if (!entry) return;
+      const endMs = Date.now();
+      const duration = Math.max(0, Math.floor((endMs - entry.startMs) / 1000));
+      p.history.unshift({
+        name: entry.name,
+        startMs: entry.startMs,
+        endMs,
+        duration
+      });
+      const record = p.counts[entry.name] || { trips: 0, totalSeconds: 0 };
+      record.totalSeconds += duration;
+      p.counts[entry.name] = record;
+      persist();
+      render();
+    }
+
+    function resetCurrentPeriod() {
+      const name = state.selectedPeriod;
+      if (!confirm(`Reset bathroom data for ${name}?`)) return;
+      state.periods[name].out = [];
+      state.periods[name].requests = [];
+      state.periods[name].onDeck = [];
+      state.periods[name].history = [];
+      state.periods[name].counts = Object.fromEntries((rosters[name] || []).map(student => [student, { trips: 0, totalSeconds: 0 }]));
+      persist();
+      render();
+    }
+
+    function parseScheduleEditor(text) {
+      const lines = text.split('\n').map(line => line.trim()).filter(Boolean);
+      const parsed = [];
+      for (const line of lines) {
+        const parts = line.split('|').map(s => s.trim());
+        if (parts.length !== 3) return null;
+        const [label, start, end] = parts;
+        if (!/^\d{2}:\d{2}$/.test(start) || !/^\d{2}:\d{2}$/.test(end)) return null;
+        parsed.push({ label, start, end });
+      }
+      return parsed;
+    }
+
+    function renderScheduleEditor() {
+      el.alternateEditor.value = state.alternateSchedule
+        .map(slot => `${slot.label} | ${slot.start} | ${slot.end}`)
+        .join('\n');
+    }
+
+    function render() {
+      const autoLabel = getAutoPeriodLabel();
+      const current = currentPeriodData();
+      const lateSeconds = Number(el.maxMinutes.value || state.maxMinutes) * 60;
+      const search = el.studentSearch.value.trim().toLowerCase();
+      const restriction = getLeaveRestrictionForSelectedPeriod();
+
+      el.todayDate.textContent = new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+      el.periodPill.textContent = `Auto: ${autoLabel} • Tracking: ${state.selectedPeriod}`;
+
+      const allTrips = PERIOD_ORDER.reduce((sum, period) => {
+        const counts = state.periods[period].counts;
+        return sum + Object.values(counts).reduce((n, rec) => n + (rec.trips || 0), 0);
+      }, 0);
+      const periodTrips = Object.values(current.counts).reduce((n, rec) => n + (rec.trips || 0), 0);
+
+      el.periodTrips.textContent = periodTrips;
+      el.outNow.textContent = current.out.length;
+      el.allTrips.textContent = allTrips;
+
+      const students = (rosters[state.selectedPeriod] || []).filter(name => name.toLowerCase().includes(search));
+      el.studentGrid.innerHTML = '';
+      el.leaveWindowMsg.style.display = restriction.blocked ? 'block' : 'none';
+      el.leaveWindowMsg.textContent = restriction.reason;
+      students.forEach(name => {
+        const rec = current.counts[name] || { trips: 0, totalSeconds: 0 };
+        const card = document.createElement('div');
+        card.className = `student ${restriction.blocked ? 'disabled' : ''}`;
+        card.innerHTML = `
+          <div class="name">${name}</div>
+          <div>
+            <span class="chip">Trips: ${rec.trips}</span>
+            <span class="chip">Total: ${formatDuration(rec.totalSeconds)}</span>
+          </div>
+          <div style="display:flex; gap:6px; flex-wrap:wrap;">
+            <button type="button" ${restriction.blocked ? 'disabled' : ''}><i class="fa-solid fa-person-walking-arrow-right"></i> Send</button>
+            <button type="button" class="secondary"><i class="fa-solid fa-bell"></i> Request</button>
+          </div>
+        `;
+        const buttons = card.querySelectorAll('button');
+        if (!restriction.blocked) buttons[0].onclick = () => sendStudentOut(name);
+        buttons[1].onclick = () => addRequest(name);
+        el.studentGrid.appendChild(card);
+      });
+
+      if (students.length === 0) {
+        el.studentGrid.innerHTML = '<p class="subtle">No students match your search.</p>';
+      }
+
+      el.requestsContainer.innerHTML = '';
+      if (current.requests.length === 0) {
+        el.requestsContainer.innerHTML = '<p class="subtle">No requests yet.</p>';
+      } else {
+        current.requests.forEach((request, index) => {
+          const row = document.createElement('div');
+          row.className = 'queue-item';
+          row.innerHTML = `
+            <div class="left">
+              <strong>${request.name}</strong>
+              <small>Requested: ${formatClock(request.requestedAt)}</small>
+            </div>
+            <div class="actions">
+              <button type="button" class="success"><i class="fa-solid fa-list-ol"></i> On Deck</button>
+              <button type="button" class="danger"><i class="fa-solid fa-xmark"></i> Remove</button>
+            </div>
+          `;
+          const actions = row.querySelectorAll('button');
+          actions[0].onclick = () => moveRequestToOnDeck(index);
+          actions[1].onclick = () => removeRequest(index);
+          el.requestsContainer.appendChild(row);
+        });
+      }
+
+      el.onDeckContainer.innerHTML = '';
+      if (current.onDeck.length === 0) {
+        el.onDeckContainer.innerHTML = '<p class="subtle">No one on deck.</p>';
+      } else {
+        current.onDeck.forEach((student, index) => {
+          const row = document.createElement('div');
+          row.className = 'queue-item';
+          row.innerHTML = `
+            <div class="left">
+              <strong>${index + 1}. ${student.name}</strong>
+              <small>Queued: ${formatClock(student.addedToDeckAt || Date.now())}</small>
+            </div>
+            <div class="actions">
+              <button type="button" ${restriction.blocked ? 'disabled' : ''}><i class="fa-solid fa-share"></i> Send</button>
+              <button type="button" class="danger"><i class="fa-solid fa-xmark"></i> Remove</button>
+            </div>
+          `;
+          const actions = row.querySelectorAll('button');
+          if (!restriction.blocked) actions[0].onclick = () => sendOnDeckToOut(index);
+          actions[1].onclick = () => removeOnDeck(index);
+          el.onDeckContainer.appendChild(row);
+        });
+      }
+
+      el.outContainer.innerHTML = '';
+      if (current.out.length === 0) {
+        el.outContainer.innerHTML = '<p class="subtle">No one is currently out.</p>';
+      } else {
+        current.out.forEach((student, index) => {
+          const elapsed = Math.floor((Date.now() - student.startMs) / 1000);
+          const card = document.createElement('div');
+          card.className = 'out-card';
+          card.innerHTML = `
+            <strong>${student.name}</strong>
+            <div class="subtle">Out since: ${formatClock(student.startMs)}</div>
+            <div class="timer ${elapsed >= lateSeconds ? 'late' : 'on-time'}">${formatDuration(elapsed)}</div>
+            <button type="button" class="success">Mark Returned</button>
+          `;
+          card.querySelector('button').onclick = () => markReturned(index);
+          el.outContainer.appendChild(card);
+        });
+      }
+
+      el.historyBody.innerHTML = '';
+      current.history.slice(0, 50).forEach(row => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${row.name}</td>
+          <td>${formatClock(row.startMs)}</td>
+          <td>${formatClock(row.endMs)}</td>
+          <td>${formatDuration(row.duration)}</td>
+        `;
+        el.historyBody.appendChild(tr);
+      });
+
+      if (current.history.length === 0) {
+        el.historyBody.innerHTML = '<tr><td colspan="4" class="subtle">No trips logged yet for this period.</td></tr>';
+      }
+    }
+
+    function syncPeriodToAutoIfPossible() {
+      const auto = getAutoPeriodLabel();
+      if (PERIOD_ORDER.includes(auto) && state.selectedPeriod !== auto) {
+        state.selectedPeriod = auto;
+        el.periodSelect.value = auto;
+        persist();
+      }
+    }
+
+    function bindEvents() {
+      el.scheduleMode.value = state.scheduleMode;
+      el.maxMinutes.value = state.maxMinutes;
+
+      el.scheduleMode.addEventListener('change', () => {
+        state.scheduleMode = el.scheduleMode.value;
+        syncPeriodToAutoIfPossible();
+        persist();
+        render();
+      });
+
+      el.periodSelect.addEventListener('change', () => {
+        state.selectedPeriod = el.periodSelect.value;
+        persist();
+        render();
+      });
+
+      el.maxMinutes.addEventListener('change', () => {
+        state.maxMinutes = Number(el.maxMinutes.value) || 5;
+        persist();
+        render();
+      });
+
+      el.studentSearch.addEventListener('input', render);
+      el.clearPeriod.addEventListener('click', resetCurrentPeriod);
+      el.toggleSchedulePanel.addEventListener('click', () => {
+        const isHidden = el.schedulePanel.style.display === 'none';
+        el.schedulePanel.style.display = isHidden ? 'block' : 'none';
+        el.toggleSchedulePanel.textContent = isHidden ? 'Hide Alternate Schedule' : 'Show Alternate Schedule';
+      });
+
+      el.saveAlternate.addEventListener('click', () => {
+        const parsed = parseScheduleEditor(el.alternateEditor.value);
+        if (!parsed) {
+          alert('Could not save schedule. Use format: Period 1 | 07:45 | 08:30 (one per line).');
+          return;
+        }
+        state.alternateSchedule = parsed;
+        persist();
+        render();
+      });
+
+      el.resetAlternate.addEventListener('click', () => {
+        state.alternateSchedule = JSON.parse(JSON.stringify(defaultAlternateSchedule));
+        renderScheduleEditor();
+        persist();
+        render();
+      });
+    }
+
+    buildPeriodSelect();
+    renderScheduleEditor();
+    bindEvents();
+    syncPeriodToAutoIfPossible();
+    render();
+    setInterval(render, 1000);
+  </script>
+</body>
+</html>

@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Teacher Setup Portal</title>
+  <style>
+    body { font-family: system-ui, sans-serif; background:#f4f7fb; margin:0; padding:20px; color:#10223b; }
+    .wrap { max-width: 980px; margin:0 auto; display:grid; gap:14px; }
+    .card { background:#fff; border-radius:12px; padding:14px; box-shadow:0 8px 20px rgba(0,0,0,.07); }
+    h1,h2,p { margin:0; }
+    .grid { display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
+    label { font-size:.84rem; color:#5a6f8d; display:block; margin-bottom:4px; }
+    input, textarea, button { width:100%; padding:9px 10px; border-radius:8px; border:1px solid #ccd8ea; font: inherit; }
+    textarea { min-height: 130px; }
+    button { width:auto; border:none; background:#2a6df4; color:#fff; cursor:pointer; font-weight:600; }
+    .row { display:flex; gap:8px; flex-wrap:wrap; }
+    .muted { color:#5a6f8d; font-size:.92rem; }
+    code { background:#eef4ff; padding:1px 5px; border-radius:5px; }
+    @media (max-width: 900px){ .grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>Bathroom Break — Teacher Link Setup</h1>
+      <p class="muted">Paste your periods and students, click save, then share your own teacher link (includes config for other devices).</p>
+    </div>
+
+    <div class="card grid">
+      <div>
+        <label for="teacherId">Teacher ID (for your unique link)</label>
+        <input id="teacherId" placeholder="example: ms-johnson" />
+      </div>
+      <div>
+        <label for="planningPeriod">Planning period</label>
+        <select id="planningPeriod">
+          <option value="Period 1">Period 1</option>
+          <option value="Period 2">Period 2</option>
+          <option value="Period 3">Period 3</option>
+          <option value="Period 4" selected>Period 4</option>
+          <option value="Period 5">Period 5</option>
+          <option value="Period 6">Period 6</option>
+          <option value="Period 7">Period 7</option>
+          <option value="custom">Custom label...</option>
+        </select>
+      </div>
+      <div>
+        <label for="planningLabel">Custom planning label (optional)</label>
+        <input id="planningLabel" value="" placeholder="e.g. Advisory / PLC" />
+      </div>
+      <div>
+        <label for="periodOrder">Teaching periods (comma-separated, no planning)</label>
+        <input id="periodOrder" value="Period 1,Period 2,Period 3,Period 5,Period 6,Period 7" />
+      </div>
+      <div>
+        <label for="titleName">Teacher page title (optional)</label>
+        <input id="titleName" placeholder="Ms. Johnson" />
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Regular Schedule</h2>
+      <p class="muted">One line per period: <code>Period 1|07:45|08:30</code></p>
+      <textarea id="scheduleText">Period 1|07:45|08:30
+Period 2|08:35|09:20
+Period 3|09:25|10:10
+Planning|10:15|11:50
+Period 5|11:55|12:40
+Period 6|12:45|13:30
+Period 7|13:35|14:20</textarea>
+    </div>
+
+    <div class="card">
+      <h2>Rosters</h2>
+      <p class="muted">Paste by sections like below. Blank line between periods.</p>
+      <textarea id="rosterText">Period 1
+Student, One
+Student, Two
+
+Period 2
+Student, Three
+Student, Four</textarea>
+    </div>
+
+    <div class="card">
+      <div class="row">
+        <button id="saveBtn">Save Teacher Config</button>
+        <button id="openBtn">Open Teacher Link</button>
+        <button id="copyBtn">Copy Teacher Link</button>
+      </div>
+      <p class="muted" style="margin-top:10px;">Teacher link: <span id="linkOut"></span></p>
+      <p class="muted" id="status"></p>
+    </div>
+  </div>
+
+  <script>
+    const el = {
+      teacherId: document.getElementById('teacherId'),
+      planningLabel: document.getElementById('planningLabel'),
+      planningPeriod: document.getElementById('planningPeriod'),
+      periodOrder: document.getElementById('periodOrder'),
+      titleName: document.getElementById('titleName'),
+      scheduleText: document.getElementById('scheduleText'),
+      rosterText: document.getElementById('rosterText'),
+      saveBtn: document.getElementById('saveBtn'),
+      openBtn: document.getElementById('openBtn'),
+      copyBtn: document.getElementById('copyBtn'),
+      linkOut: document.getElementById('linkOut'),
+      status: document.getElementById('status')
+    };
+
+    function normalizedTeacherId() {
+      return (el.teacherId.value || '').trim().toLowerCase().replace(/[^a-z0-9-_]/g, '');
+    }
+
+    function encodeConfig(config) {
+      return btoa(unescape(encodeURIComponent(JSON.stringify(config))));
+    }
+
+    function teacherLink(config) {
+      const id = normalizedTeacherId();
+      if (!id) return '';
+      const appUrl = new URL('/bathroomPass.html', window.location.origin);
+      const base = `${appUrl.toString()}?teacher=${encodeURIComponent(id)}`;
+      if (!config) return base;
+      return `${base}&config=${encodeURIComponent(encodeConfig(config))}`;
+    function teacherLink() {
+      const id = normalizedTeacherId();
+      if (!id) return '';
+      return `${window.location.origin}${window.location.pathname.replace('/teacher-portal/index.html', '/bathroomPass.html')}?teacher=${encodeURIComponent(id)}`;
+    }
+
+    function parseSchedule(text) {
+      return text.split('\n').map(l => l.trim()).filter(Boolean).map(line => {
+        const [label, start, end] = line.split('|').map(s => (s || '').trim());
+        if (!label || !start || !end) throw new Error(`Invalid schedule line: ${line}`);
+        return { label, start, end };
+      });
+    }
+
+    function parseRosters(text) {
+      const lines = text.split('\n');
+      const rosters = {};
+      let current = null;
+      for (const raw of lines) {
+        const line = raw.trim();
+        if (!line) continue;
+        if (/^period\s*\d+/i.test(line) || /planning/i.test(line) || /advisory/i.test(line)) {
+          current = line;
+          rosters[current] = rosters[current] || [];
+          continue;
+        }
+        if (!current) throw new Error('Roster lines must be under a period header.');
+        rosters[current].push(line);
+      }
+      return rosters;
+    }
+
+    function saveConfig() {
+      const id = normalizedTeacherId();
+      if (!id) throw new Error('Teacher ID is required.');
+
+      const config = {
+        planningLabel: el.planningPeriod.value === 'custom'
+          ? (el.planningLabel.value.trim() || 'Planning')
+          : el.planningPeriod.value,
+        planningLabel: el.planningLabel.value.trim() || 'Planning',
+        periodOrder: el.periodOrder.value.split(',').map(s => s.trim()).filter(Boolean),
+        regularSchedule: parseSchedule(el.scheduleText.value),
+        rosters: parseRosters(el.rosterText.value),
+        teacherTitle: el.titleName.value.trim()
+      };
+
+      localStorage.setItem(`bathroom-break-config-${id}`, JSON.stringify(config));
+      fetch('http://localhost:8787/api/teacher-portals', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          teacher_id: id,
+          teacher_title: config.teacherTitle,
+          planning_label: config.planningLabel,
+          period_order: config.periodOrder
+        })
+      }).catch(() => {});
+      return { id, config, link: teacherLink(config) };
+      return teacherLink();
+    }
+
+    function refreshLink() {
+      el.linkOut.textContent = teacherLink() || '(enter teacher id)';
+    }
+
+    el.teacherId.addEventListener('input', refreshLink);
+
+    el.saveBtn.addEventListener('click', () => {
+      try {
+        const result = saveConfig();
+        el.status.textContent = `Saved! Share this link: ${result.link}`;
+        el.linkOut.textContent = result.link;
+        const link = saveConfig();
+        el.status.textContent = `Saved! Use this link: ${link}`;
+        refreshLink();
+      } catch (err) {
+        el.status.textContent = err.message;
+      }
+    });
+
+    el.openBtn.addEventListener('click', () => {
+      try {
+        const result = saveConfig();
+        window.location.href = result.link;
+      } catch (err) {
+        el.status.textContent = err.message;
+      }
+    });
+
+    el.copyBtn.addEventListener('click', async () => {
+      try {
+        const result = saveConfig();
+        await navigator.clipboard.writeText(result.link);
+        el.status.textContent = 'Teacher link copied (with config).';
+        el.linkOut.textContent = result.link;
+      } catch (err) {
+        el.status.textContent = err.message;
+      }
+      const link = teacherLink();
+      if (!link) return;
+      window.open(link, '_blank');
+    });
+
+    el.copyBtn.addEventListener('click', async () => {
+      const link = teacherLink();
+      if (!link) return;
+      await navigator.clipboard.writeText(link);
+      el.status.textContent = 'Teacher link copied.';
+    });
+
+    refreshLink();
+  </script>
+</body>
+</html>
