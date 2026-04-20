@@ -103,6 +103,25 @@ const timerStartButton = document.getElementById('timerStart');
 const timerResetButton = document.getElementById('timerReset');
 const timerDisplayEl = document.getElementById('timerDisplay');
 const timerStatusEl = document.getElementById('timerStatus');
+const workspaceGridEl = document.getElementById('workspaceGrid');
+const viewDashboardBtn = document.getElementById('viewDashboard');
+const viewBathroomBtn = document.getElementById('viewBathroom');
+const viewSplitBtn = document.getElementById('viewSplit');
+const pickerTeacherIdInput = document.getElementById('pickerTeacherId');
+const pickerPeriodSelect = document.getElementById('pickerPeriod');
+const syncCurrentPeriodBtn = document.getElementById('syncCurrentPeriod');
+const pickStudentBtn = document.getElementById('pickStudent');
+const pickerResultEl = document.getElementById('pickerResult');
+const pickerMetaEl = document.getElementById('pickerMeta');
+
+const defaultRosters = {
+  'Period 1': ['Beason, Kyrell', 'Blevins, Faith', 'Bringham, Nathaniel', 'Buckner, Bevyn', 'Carson, Cash', 'Cruz Lemus, Katya', 'Damian, Miguel', 'Dansby, Sean', 'Fountain, Akeelah', 'Guadalupe Flores, Alexis', 'Hatton, Cayden', 'Haymer, Ki\'Avoni', 'Hightower, Austin', 'Jordan, Mariah', 'LaMaster, Mason', 'Morales, Landon', 'PadillaThornton, Zachariah', 'Palemon, Luis', 'Patrick, Micah', 'Richardson, Steven', 'Riddlespriger, Marley', 'Santana, Jason', 'Segebart, Chasity', 'Sharpnack, Alissa', 'Vowell, Layla'],
+  'Period 2': ['Booker, Milana', 'Burnell, Logan', 'Chavez Morales, Alfredo', 'Durbin, Blake', 'Fountain, Isaac', 'Garner, Marquel', 'Hargett, Easton', 'Haskins, Caelan', 'Hernandez, Myshielis', 'Holman, Chase', 'Lewis, Ava', 'Magallon, Heily', 'Miller, Bryson', 'Napier, Braylen', 'Pasley, Elijah', 'Rojas, Jovanny', 'Santillan, Emiliano', 'Shircliff, Madelyn', 'Stephens, Rowaan', 'Williams, Anjalese', 'Wilson, Tristin'],
+  'Period 3': ['Alokoa, Kobesasi-Ismael', 'Alvarenga, Haylee', 'Asare, Kingsley', 'Beckam, Jackson', 'Early, Samson', 'Escobar, Jacqueline', 'Liles, Aminah', 'Linthicome, Deontae', 'Miller, Christian', 'Pulliam, Kenzie', 'Reed, Terrain', 'Rubio, Adair', 'Sparkman, Noah', 'Wilson, Ty\'Tianna', 'Bobo, Luke', 'Brown, Brandon', 'Buckner, Stephen', 'Conner, Kingston', 'Fountain, Elijah', 'Fulkerson, Melody', 'Greenwade, Jeremiah', 'Ortiz, Christopher', 'Parker, Raina', 'Payne, Jaden', 'Rozier, Michael', 'Schilling, Kenshawn'],
+  'Period 5': ['Blevins, Miah', 'Campos Juarez, Brandon', 'Dunn, Ari\'hya', 'Gonzalez Rojas, Misael', 'Greene, Shane', 'Hernandez Suarez, Santiago', 'Hicks, Makenzie', 'Jimenez Hidalgo, Camila', 'Johnson, Tyren', 'Jordan, Amiyah', 'Middleton, Arayiah', 'Moore, Ayedenn', 'Newson, Justice', 'Ricketts, Aiden', 'Rosas, Rhianna', 'Smith, Ja\'Rayah', 'Wagner, Aaliyah', 'Washington, Kori', 'Wright, Dyamon', 'Alvarado, Kayleen', 'Baker, Jeremy', 'Bratcher, Isaiah', 'Claros Ramos, Loany', 'Crosby, Kobe', 'Eldridge, Madison', 'Forrest, Jackson', 'Gaytan, Alistair', 'Gleitz, Christian', 'Harper, Kaylee', 'Hatcher-Daniel, Jae\'shaun', 'Martin, Kaniel', 'Misic, Aiden', 'Smith, Ariana', 'Smith, Spencer', 'Wickliffe, Tytionna'],
+  'Period 6': ['Amos, Skylan', 'Anderson, Alyssa', 'Baggett, Yorel', 'Brown, Autumn', 'Brown, Sariya', 'Coates, Andrew', 'Cross, Yanaija', 'Dunn, Samuel', 'Kannamore-Carter, Ra\'janae', 'Maniloff, Georgia', 'Marshall, Maya', 'Medrano, Lygaci', 'Moorman, Dionna', 'Nash, Mekhi', 'Parham, Symphony', 'Pena, Daylin', 'Shelton, Arion', 'Thomas, Ja\'Miracle', 'Thompson, Lorenzo'],
+  'Period 7': ['Alvarez Madrid, Luis', 'Bailey, Breanna', 'Benn, Mya', 'Britto, Emery', 'Cannon, Evan', 'Copas, Stephanie', 'Culver, Chase', 'Delgado, Isaac', 'Eppler, Robert', 'Gary, Nevaeh', 'Gruver, Michael', 'Hinkle, Aria', 'Jones, Chloe', 'Jones-Turner, Reno', 'Pena Canseco, Jose', 'Ross, Baylee', 'Santana, Jeiran', 'Santos, Edgar', 'Young, Braylen', 'Black, Arianna', 'Brown, Riyhlen', 'Conde, Eli', 'Ellery, Detrick', 'Finch, Brycen', 'Humphreys, Rylan', 'Mills, Andrew', 'Piccuito, Hannah', 'Spaulding, Easton', 'Vazquez, Fidel']
+};
 
 let audioContext;
 let lofiMasterGain;
@@ -112,8 +131,14 @@ let timerIntervalId;
 let timerEndTimestamp;
 let remainingSeconds = 180;
 let timerIsRunning = false;
+let rosterData = defaultRosters;
+let rosterSource = 'default dashboard roster';
 
 initializeScheduleSettings();
+initializeWorkspaceView();
+refreshRosterData();
+setPickerToCurrentPeriod();
+renderPickerPeriods();
 
 function toMinutes(hhmm) {
   const [hours, minutes] = hhmm.split(':').map(Number);
@@ -294,6 +319,86 @@ function updateClock() {
   const now = new Date();
   clockEl.textContent = now.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', second: '2-digit' });
   dateEl.textContent = now.toLocaleDateString([], { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+function setWorkspaceMode(mode) {
+  workspaceGridEl.classList.remove('mode-dashboard', 'mode-bathroom', 'mode-split');
+  workspaceGridEl.classList.add(`mode-${mode}`);
+  viewDashboardBtn.classList.toggle('active', mode === 'dashboard');
+  viewBathroomBtn.classList.toggle('active', mode === 'bathroom');
+  viewSplitBtn.classList.toggle('active', mode === 'split');
+  localStorage.setItem('teachingDashboardWorkspaceMode', mode);
+}
+
+function initializeWorkspaceView() {
+  const savedMode = localStorage.getItem('teachingDashboardWorkspaceMode');
+  if (savedMode && ['dashboard', 'bathroom', 'split'].includes(savedMode)) {
+    setWorkspaceMode(savedMode);
+  } else {
+    setWorkspaceMode('dashboard');
+  }
+}
+
+function refreshRosterData() {
+  const teacherId = (pickerTeacherIdInput.value || '').trim() || 'mr-bramer';
+  const key = `bathroom-break-config-${teacherId}`;
+  const savedConfig = localStorage.getItem(key);
+  if (savedConfig) {
+    try {
+      const parsedConfig = JSON.parse(savedConfig);
+      if (parsedConfig?.rosters && typeof parsedConfig.rosters === 'object') {
+        rosterData = parsedConfig.rosters;
+        rosterSource = `teacher config (${teacherId})`;
+      }
+    } catch {
+      rosterData = defaultRosters;
+      rosterSource = 'default dashboard roster';
+    }
+  } else {
+    rosterData = defaultRosters;
+    rosterSource = 'default dashboard roster';
+  }
+  renderPickerPeriods();
+}
+
+function currentPeriodLabel() {
+  const periods = activeSchedule();
+  const currentPeriodIndex = getCurrentPeriod(periods);
+  if (currentPeriodIndex < 0) return '';
+  return periods[currentPeriodIndex].label;
+}
+
+function renderPickerPeriods() {
+  const periodNames = Object.keys(rosterData);
+  const selected = pickerPeriodSelect.value;
+  pickerPeriodSelect.innerHTML = periodNames.map((period) => `<option value="${period}">${period}</option>`).join('');
+  if (periodNames.includes(selected)) {
+    pickerPeriodSelect.value = selected;
+  }
+  pickerMetaEl.textContent = `Roster source: ${rosterSource}.`;
+}
+
+function setPickerToCurrentPeriod() {
+  const label = currentPeriodLabel();
+  if (label && [...pickerPeriodSelect.options].some((option) => option.value === label)) {
+    pickerPeriodSelect.value = label;
+    pickerResultEl.textContent = `Period synced to ${label}.`;
+  } else {
+    pickerResultEl.textContent = 'Current period has no roster loaded. Choose a period manually.';
+  }
+}
+
+function pickRandomStudent() {
+  const period = pickerPeriodSelect.value;
+  const students = rosterData[period] || [];
+  if (!students.length) {
+    pickerResultEl.textContent = `No students found for ${period}.`;
+    return;
+  }
+  const randomIndex = Math.floor(Math.random() * students.length);
+  const student = students[randomIndex];
+  pickerResultEl.textContent = `🎯 ${student} (${period})`;
+  pickerMetaEl.textContent = `Roster source: ${rosterSource} • ${students.length} students in ${period}.`;
 }
 
 function initializeScheduleSettings() {
@@ -506,6 +611,15 @@ timerDurationSelect.addEventListener('change', () => {
     syncTimerDisplay();
   }
 });
+viewDashboardBtn.addEventListener('click', () => setWorkspaceMode('dashboard'));
+viewBathroomBtn.addEventListener('click', () => setWorkspaceMode('bathroom'));
+viewSplitBtn.addEventListener('click', () => setWorkspaceMode('split'));
+pickerTeacherIdInput.addEventListener('change', () => {
+  refreshRosterData();
+  setPickerToCurrentPeriod();
+});
+syncCurrentPeriodBtn.addEventListener('click', setPickerToCurrentPeriod);
+pickStudentBtn.addEventListener('click', pickRandomStudent);
 
 updateClock();
 renderSchedule();
