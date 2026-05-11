@@ -20,6 +20,7 @@
     input,button{ background:#10203b; color:var(--text); border:1px solid var(--border); border-radius:8px; padding:8px; }
     button{ cursor:pointer; }
     .warn{ color:var(--danger); }
+    .ok { color:var(--accent); }
     .kpi { display:flex; justify-content:space-between; gap:8px; padding:6px 0; border-bottom:1px dashed var(--border); font-size:13px; }
     .kpi:last-child { border-bottom:none; }
   </style>
@@ -65,12 +66,12 @@
     const daysLeftEl = document.getElementById('daysLeft');
     const nameEl = document.getElementById('name');
     const schedule = [
-      { label:'Period 1', start:'07:45', end:'08:30', breakStart:'08:00' },
-      { label:'Period 2', start:'08:35', end:'09:20', breakStart:'08:50' },
-      { label:'Period 3', start:'09:25', end:'10:10', breakStart:'09:40' },
-      { label:'Period 5', start:'11:55', end:'12:40', breakStart:'12:10' },
-      { label:'Period 6', start:'12:45', end:'13:30', breakStart:'13:00' },
-      { label:'Period 7', start:'13:35', end:'14:20', breakStart:'13:50' }
+      { label:'Period 1', start:'07:45', end:'08:30', breakStart:'08:00', breakEnd:'08:15' },
+      { label:'Period 2', start:'08:35', end:'09:20', breakStart:'08:50', breakEnd:'09:05' },
+      { label:'Period 3', start:'09:25', end:'10:10', breakStart:'09:40', breakEnd:'09:55' },
+      { label:'Period 5', start:'11:55', end:'12:40', breakStart:'12:10', breakEnd:'12:25' },
+      { label:'Period 6', start:'12:45', end:'13:30', breakStart:'13:00', breakEnd:'13:15' },
+      { label:'Period 7', start:'13:35', end:'14:20', breakStart:'13:50', breakEnd:'14:05' }
     ];
     const schoolEndDate = new Date('2026-05-20T23:59:59');
     const toMinutes = (hhmm) => {
@@ -82,6 +83,19 @@
       const m = Math.floor(safe/60);
       const s = safe%60;
       return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    };
+    const schoolDaysUntil = (fromDate, toDate) => {
+      const start = new Date(fromDate.getFullYear(), fromDate.getMonth(), fromDate.getDate());
+      const end = new Date(toDate.getFullYear(), toDate.getMonth(), toDate.getDate());
+      if (start > end) return 0;
+      let count = 0;
+      const cursor = new Date(start);
+      while (cursor <= end) {
+        const day = cursor.getDay();
+        if (day !== 0 && day !== 6) count += 1;
+        cursor.setDate(cursor.getDate() + 1);
+      }
+      return count;
     };
     function save(){ localStorage.setItem('ops-v2-vanilla-bathroom', JSON.stringify(entries)); }
     function draw(){
@@ -103,18 +117,23 @@
       if (current) {
         untilEndEl.textContent = formatSec((toMinutes(current.end)*60)-nowSec);
         const breakStartSec = toMinutes(current.breakStart)*60;
+        const breakEndSec = toMinutes(current.breakEnd)*60;
+        untilBreakEl.classList.remove('warn', 'ok');
         if (nowSec < breakStartSec) {
           untilBreakEl.textContent = formatSec(breakStartSec-nowSec);
+        } else if (nowSec < breakEndSec) {
+          untilBreakEl.textContent = `CLOSES IN ${formatSec(breakEndSec-nowSec)}`;
+          untilBreakEl.classList.add('ok');
         } else {
-          untilBreakEl.textContent = 'OPEN / PASSED';
+          untilBreakEl.textContent = 'BREAK CLOSED';
+          untilBreakEl.classList.add('warn');
         }
       } else {
         untilEndEl.textContent = '--:--';
         untilBreakEl.textContent = '--:--';
+        untilBreakEl.classList.remove('warn', 'ok');
       }
-      const msLeft = schoolEndDate.getTime() - n.getTime();
-      const days = Math.max(0, Math.ceil(msLeft / (1000*60*60*24)));
-      daysLeftEl.textContent = String(days);
+      daysLeftEl.textContent = String(schoolDaysUntil(n, schoolEndDate));
 
       clock.textContent=n.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit', second:'2-digit'});
       date.textContent=n.toLocaleDateString([], {weekday:'short', month:'short', day:'numeric', year:'numeric'});
