@@ -62,6 +62,62 @@ h1, h2, p {
   margin-bottom: 0.7rem;
 }
 
+.workspace-panel {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.workspace-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  align-items: center;
+}
+
+.view-btn {
+  border: 1px solid #d1d5db;
+  border-radius: 999px;
+  background: #f3f4f6;
+  padding: 0.45rem 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.open-v2-btn {
+  text-decoration: none;
+  color: inherit;
+}
+
+.view-btn.active {
+  background: #2563eb;
+  color: #fff;
+  border-color: #2563eb;
+}
+
+.open-link {
+  margin-left: auto;
+  font-weight: 600;
+  color: #1d4ed8;
+  text-decoration: none;
+}
+
+.workspace-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.workspace-grid.mode-bathroom #dashboardColumn {
+  display: none;
+}
+
+.workspace-grid.mode-dashboard #bathroomColumn {
+  display: none;
+}
+
+.workspace-grid.mode-split {
+  grid-template-columns: minmax(450px, 1.2fr) minmax(360px, 1fr);
+  align-items: start;
+}
+
 .focus-tools {
   display: grid;
   grid-template-columns: repeat(2, minmax(220px, 1fr));
@@ -144,6 +200,23 @@ h1, h2, p {
   border: 1px solid #d1d5db;
   border-radius: 10px;
   padding: 0.55rem;
+}
+
+.student-picker-controls {
+  grid-template-columns: minmax(180px, 220px) minmax(180px, 220px) minmax(220px, 1fr);
+}
+
+.picker-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  align-self: end;
+}
+
+.picker-result {
+  margin-top: 0.65rem;
+  font-size: 1.1rem;
+  font-weight: 700;
 }
 
 .schedule {
@@ -242,6 +315,13 @@ h1, h2, p {
   border-top: 1px dashed #93c5fd;
 }
 
+.bathroom-panel iframe {
+  width: 100%;
+  min-height: 900px;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+}
+
 @media (max-width: 900px) {
   .topbar {
     flex-direction: column;
@@ -255,6 +335,15 @@ h1, h2, p {
 
   .controls,
   .focus-tools {
+    grid-template-columns: 1fr;
+  }
+
+  .open-link {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .workspace-grid.mode-split {
     grid-template-columns: 1fr;
   }
 
