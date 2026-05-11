@@ -10,7 +10,7 @@
     body { margin:0; background:var(--bg); color:var(--text); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
     .shell { height:100vh; display:grid; grid-template-columns: 320px 1fr; gap:10px; padding:10px; }
     .panel { background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:10px; }
-    .left { display:grid; grid-auto-rows:min-content; gap:10px; }
+    .left { display:grid; grid-auto-rows:min-content; gap:10px; overflow:auto; padding-right:2px; }
     .title { font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin:0 0 8px; }
     .clock { font-size:34px; font-weight:700; }
     .muted { color:var(--muted); font-size:12px; }
@@ -20,6 +20,8 @@
     input,button{ background:#10203b; color:var(--text); border:1px solid var(--border); border-radius:8px; padding:8px; }
     button{ cursor:pointer; }
     .warn{ color:var(--danger); }
+    .kpi { display:flex; justify-content:space-between; gap:8px; padding:6px 0; border-bottom:1px dashed var(--border); font-size:13px; }
+    .kpi:last-child { border-bottom:none; }
   </style>
 </head>
 <body>
@@ -29,6 +31,13 @@
         <p class="title">Current Time</p>
         <div id="clock" class="clock"></div>
         <div id="date" class="muted"></div>
+      </article>
+      <article class="panel">
+        <p class="title">Live Class Timers</p>
+        <div class="kpi"><span>Current Class</span><strong id="currentClass">--</strong></div>
+        <div class="kpi"><span>Until Bathroom Break</span><strong id="untilBreak">--:--</strong></div>
+        <div class="kpi"><span>Until Class End</span><strong id="untilEnd">--:--</strong></div>
+        <div class="kpi"><span>Days Until School Ends</span><strong id="daysLeft">--</strong></div>
       </article>
       <article class="panel">
         <p class="title">Subject / Unit</p>
@@ -50,7 +59,30 @@
     const clock = document.getElementById('clock');
     const date = document.getElementById('date');
     const rr = document.getElementById('rr');
+    const currentClassEl = document.getElementById('currentClass');
+    const untilBreakEl = document.getElementById('untilBreak');
+    const untilEndEl = document.getElementById('untilEnd');
+    const daysLeftEl = document.getElementById('daysLeft');
     const nameEl = document.getElementById('name');
+    const schedule = [
+      { label:'Period 1', start:'07:45', end:'08:30', breakStart:'08:00' },
+      { label:'Period 2', start:'08:35', end:'09:20', breakStart:'08:50' },
+      { label:'Period 3', start:'09:25', end:'10:10', breakStart:'09:40' },
+      { label:'Period 5', start:'11:55', end:'12:40', breakStart:'12:10' },
+      { label:'Period 6', start:'12:45', end:'13:30', breakStart:'13:00' },
+      { label:'Period 7', start:'13:35', end:'14:20', breakStart:'13:50' }
+    ];
+    const schoolEndDate = new Date('2026-05-20T23:59:59');
+    const toMinutes = (hhmm) => {
+      const [h,m] = hhmm.split(':').map(Number);
+      return h*60+m;
+    };
+    const formatSec = (sec) => {
+      const safe = Math.max(0, Math.floor(sec));
+      const m = Math.floor(safe/60);
+      const s = safe%60;
+      return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    };
     function save(){ localStorage.setItem('ops-v2-vanilla-bathroom', JSON.stringify(entries)); }
     function draw(){
       rr.innerHTML = entries.map((e,i)=>{
@@ -62,7 +94,32 @@
     window.markIn = (i) => { entries[i].inAt = Date.now(); save(); draw(); };
     document.getElementById('out').addEventListener('click', ()=>{ if(!nameEl.value.trim()) return; entries.unshift({name:nameEl.value.trim(), outAt:Date.now()}); nameEl.value=''; save(); draw(); });
     nameEl.addEventListener('keydown', (e)=>{ if(e.key==='Enter') document.getElementById('out').click(); });
-    setInterval(()=>{ const n=new Date(); clock.textContent=n.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit', second:'2-digit'}); date.textContent=n.toLocaleDateString([], {weekday:'short', month:'short', day:'numeric', year:'numeric'}); draw(); }, 1000);
+    setInterval(()=>{
+      const n=new Date();
+      const nowMin = n.getHours()*60+n.getMinutes();
+      const nowSec = n.getHours()*3600+n.getMinutes()*60+n.getSeconds();
+      const current = schedule.find((p)=> nowMin >= toMinutes(p.start) && nowMin < toMinutes(p.end));
+      currentClassEl.textContent = current ? current.label : 'Outside Class';
+      if (current) {
+        untilEndEl.textContent = formatSec((toMinutes(current.end)*60)-nowSec);
+        const breakStartSec = toMinutes(current.breakStart)*60;
+        if (nowSec < breakStartSec) {
+          untilBreakEl.textContent = formatSec(breakStartSec-nowSec);
+        } else {
+          untilBreakEl.textContent = 'OPEN / PASSED';
+        }
+      } else {
+        untilEndEl.textContent = '--:--';
+        untilBreakEl.textContent = '--:--';
+      }
+      const msLeft = schoolEndDate.getTime() - n.getTime();
+      const days = Math.max(0, Math.ceil(msLeft / (1000*60*60*24)));
+      daysLeftEl.textContent = String(days);
+
+      clock.textContent=n.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+      date.textContent=n.toLocaleDateString([], {weekday:'short', month:'short', day:'numeric', year:'numeric'});
+      draw();
+    }, 1000);
   </script>
 </body>
 </html>
