@@ -110,6 +110,50 @@
       gap: 8px;
       font-weight: 600;
     }
+    .segment-snapshot {
+      margin-top: 10px;
+      border: 1px solid #dce8ff;
+      background: #f6f9ff;
+      border-radius: 12px;
+      padding: 10px;
+      display: grid;
+      gap: 8px;
+    }
+    .segment-snapshot .head {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .segment-snapshot .head strong {
+      font-size: 0.96rem;
+    }
+    .segment-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      gap: 6px;
+    }
+    .segment-item {
+      border-radius: 9px;
+      padding: 7px 8px;
+      background: #eaf0fa;
+      border-left: 4px solid #9fb6dd;
+      font-size: 0.88rem;
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .segment-item.current {
+      border: 1px solid #2a6df4;
+      background: #e8f0ff;
+    }
+    .segment-kind-no_bathroom { border-left-color: var(--danger); }
+    .segment-kind-bathroom_window { border-left-color: var(--accent); }
+    .segment-kind-lunch { border-left-color: var(--warning); }
+    .segment-kind-class { border-left-color: var(--ok); }
 
     .stats {
       display: grid;
@@ -302,6 +346,7 @@
         </div>
 
         <div class="period-pill" id="periodPill"></div>
+        <article id="segmentSnapshot" class="segment-snapshot"></article>
       </div>
 
       <div>
@@ -493,6 +538,7 @@
       periodSelect: document.getElementById('periodSelect'),
       maxMinutes: document.getElementById('maxMinutes'),
       periodPill: document.getElementById('periodPill'),
+      segmentSnapshot: document.getElementById('segmentSnapshot'),
       periodTrips: document.getElementById('periodTrips'),
       outNow: document.getElementById('outNow'),
       allTrips: document.getElementById('allTrips'),
@@ -584,6 +630,13 @@
       return h * 60 + m;
     }
 
+    function formatTime(timeString) {
+      const [h, m] = timeString.split(':').map(Number);
+      const h12 = ((h + 11) % 12) + 1;
+      const suffix = h >= 12 ? 'PM' : 'AM';
+      return `${h12}:${String(m).padStart(2, '0')} ${suffix}`;
+    }
+
     function nowMinutes() {
       const d = new Date();
       return d.getHours() * 60 + d.getMinutes();
@@ -600,7 +653,7 @@
       for (const slot of getSchedule()) {
         const start = toMinutes(slot.start);
         const end = toMinutes(slot.end);
-        if (now >= start && now <= end) return slot.label;
+        if (now >= start && now < end) return slot.label;
       }
       return 'Outside class periods';
     }
@@ -628,12 +681,12 @@
       const start = toMinutes(slot.start);
       const end = toMinutes(slot.end);
 
-      if (now < start || now > end) return { blocked: false, reason: '' };
+      if (now < start || now >= end) return { blocked: false, reason: '' };
 
       const segmentSource = slot.label === 'Period 4' && state.scheduleMode !== 'delay'
         ? (period4Tracks[state.track] || slot.segments || [])
         : (slot.segments || []);
-      const activeSegment = segmentSource.find(seg => now >= toMinutes(seg.start) && now <= toMinutes(seg.end));
+      const activeSegment = segmentSource.find(seg => now >= toMinutes(seg.start) && now < toMinutes(seg.end));
 
       if (activeSegment) {
         if (activeSegment.kind === 'no_bathroom') return { blocked: true, reason: 'RR is blocked during this segment.', maxOut: 0 };
@@ -645,6 +698,61 @@
         return { blocked: true, reason: 'RR is not available during this segment.', maxOut: 0 };
       }
       return { blocked: false, reason: '', maxOut: 1 };
+    }
+
+    function segmentLabel(kind) {
+      if (kind === 'no_bathroom') return 'First/Last 15 min — NO LEAVING';
+      if (kind === 'bathroom_window') return 'RR WINDOW — 15 min max, 2 students';
+      if (kind === 'lunch') return 'Lunch';
+      if (kind === 'class') return 'Class block';
+      return 'Class segment';
+    }
+
+    function getSelectedPeriodSegmentSnapshot() {
+      const slot = getSchedule().find(s => s.label === state.selectedPeriod);
+      if (!slot) return null;
+
+      const segments = slot.label === 'Period 4' && state.scheduleMode !== 'delay'
+        ? (period4Tracks[state.track] || slot.segments || [])
+        : (slot.segments || []);
+
+      const now = nowMinutes();
+      const currentSegment = segments.find(seg => now >= toMinutes(seg.start) && now < toMinutes(seg.end));
+
+      return { slot, segments, currentSegment };
+    }
+
+    function renderSegmentSnapshot() {
+      const snapshot = getSelectedPeriodSegmentSnapshot();
+      if (!snapshot) {
+        el.segmentSnapshot.innerHTML = '<p class="subtle">No schedule segment available for this period.</p>';
+        return;
+      }
+
+      const { slot, segments, currentSegment } = snapshot;
+      const head = `
+        <div class="head">
+          <strong>${slot.label}</strong>
+          <span class="subtle">${formatTime(slot.start)} - ${formatTime(slot.end)}</span>
+        </div>
+      `;
+
+      if (!segments.length) {
+        el.segmentSnapshot.innerHTML = `${head}<p class="subtle">No segment map available for this schedule block.</p>`;
+        return;
+      }
+
+      const list = segments.map(seg => {
+        const isCurrent = currentSegment && currentSegment.start === seg.start && currentSegment.end === seg.end;
+        return `
+          <li class="segment-item segment-kind-${seg.kind || 'class'} ${isCurrent ? 'current' : ''}">
+            <span>${formatTime(seg.start)} - ${formatTime(seg.end)}</span>
+            <span>${seg.label || segmentLabel(seg.kind)}</span>
+          </li>
+        `;
+      }).join('');
+
+      el.segmentSnapshot.innerHTML = `${head}<ul class="segment-list">${list}</ul>`;
     }
 
     function buildPeriodSelect() {
@@ -809,6 +917,7 @@
 
       el.todayDate.textContent = new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
       el.periodPill.textContent = `Auto: ${autoLabel} • Tracking: ${state.selectedPeriod}`;
+      renderSegmentSnapshot();
 
       const allTrips = MANAGED_PERIODS.reduce((sum, period) => {
         const counts = state.periods[period].counts;
@@ -836,12 +945,14 @@
         el.leaveWindowMsg.textContent = 'This period is locked. Sending and queue changes are disabled.';
       } else {
         el.leaveWindowMsg.style.display = restriction.blocked ? 'block' : 'none';
-        el.leaveWindowMsg.textContent = restriction.reason;
+        el.leaveWindowMsg.textContent = restriction.blocked
+          ? `${restriction.reason} Requests are still allowed.`
+          : '';
       }
       students.forEach(name => {
         const rec = current.counts[name] || { trips: 0, totalSeconds: 0 };
         const card = document.createElement('div');
-        card.className = `student ${(restriction.blocked || isLocked) ? 'disabled' : ''}`;
+        card.className = `student ${isLocked ? 'disabled' : ''}`;
         card.innerHTML = `
           <div class="name">${name}</div>
           <div>
@@ -1022,7 +1133,10 @@
     bindEvents();
     syncPeriodToAutoIfPossible();
     render();
-    setInterval(render, 1000);
+    setInterval(() => {
+      syncPeriodToAutoIfPossible();
+      render();
+    }, 1000);
   </script>
 </body>
 </html>
