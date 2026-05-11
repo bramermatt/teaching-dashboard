@@ -82,6 +82,10 @@ h1, h2, p {
   font-weight: 600;
   cursor: pointer;
 }
+.open-v2-btn {
+  text-decoration: none;
+  color: inherit;
+}
 
 .view-btn.active {
   background: #2563eb;
