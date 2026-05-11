@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Teacher Ops Dashboard v2 (Vanilla)</title>
+  <style>
+    :root { --bg:#04070d; --panel:#0b1324; --border:#21406b; --text:#d8e8ff; --muted:#7d9cc6; --accent:#58b8ff; --danger:#ff6b6b; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:var(--bg); color:var(--text); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .shell { height:100vh; display:grid; grid-template-columns: 320px 1fr; gap:10px; padding:10px; }
+    .panel { background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:10px; }
+    .left { display:grid; grid-auto-rows:min-content; gap:10px; }
+    .title { font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin:0 0 8px; }
+    .clock { font-size:34px; font-weight:700; }
+    .muted { color:var(--muted); font-size:12px; }
+    .rr { display:grid; gap:8px; max-height:250px; overflow:auto; }
+    .row { border:1px solid var(--border); border-radius:8px; padding:6px; font-size:13px; }
+    iframe { width:100%; height:calc(100vh - 22px); border:none; border-radius:10px; }
+    input,button{ background:#10203b; color:var(--text); border:1px solid var(--border); border-radius:8px; padding:8px; }
+    button{ cursor:pointer; }
+    .warn{ color:var(--danger); }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <section class="left">
+      <article class="panel">
+        <p class="title">Current Time</p>
+        <div id="clock" class="clock"></div>
+        <div id="date" class="muted"></div>
+      </article>
+      <article class="panel">
+        <p class="title">Subject / Unit</p>
+        <div>Integrated Chemistry/Physics</div>
+      </article>
+      <article class="panel">
+        <p class="title">Bathroom Tracker</p>
+        <div style="display:flex; gap:6px; margin-bottom:8px;"><input id="name" placeholder="Student name" /><button id="out">Out</button></div>
+        <div id="rr" class="rr"></div>
+      </article>
+    </section>
+    <section class="panel">
+      <p class="title">Bathroom Board (Fullscreen Embedded)</p>
+      <iframe src="../apps/bathroom-pass/index.html?teacher=mr-bramer"></iframe>
+    </section>
+  </main>
+  <script>
+    const entries = JSON.parse(localStorage.getItem('ops-v2-vanilla-bathroom') || '[]');
+    const clock = document.getElementById('clock');
+    const date = document.getElementById('date');
+    const rr = document.getElementById('rr');
+    const nameEl = document.getElementById('name');
+    function save(){ localStorage.setItem('ops-v2-vanilla-bathroom', JSON.stringify(entries)); }
+    function draw(){
+      rr.innerHTML = entries.map((e,i)=>{
+        const sec = Math.floor(((e.inAt || Date.now()) - e.outAt)/1000);
+        const min = Math.floor(sec/60); const s = sec%60;
+        return `<div class="row"><div style="display:flex;justify-content:space-between;"><strong>${e.name}</strong><span class="${sec>600?'warn':''}">${String(min).padStart(2,'0')}:${String(s).padStart(2,'0')}</span></div><div class="muted">Out ${new Date(e.outAt).toLocaleTimeString()} ${e.inAt?`• In ${new Date(e.inAt).toLocaleTimeString()}`:''}</div>${!e.inAt?`<button onclick="markIn(${i})" style="margin-top:6px;">Mark In</button>`:''}</div>`;
+      }).join('') || '<p class="muted">No students out.</p>';
+    }
+    window.markIn = (i) => { entries[i].inAt = Date.now(); save(); draw(); };
+    document.getElementById('out').addEventListener('click', ()=>{ if(!nameEl.value.trim()) return; entries.unshift({name:nameEl.value.trim(), outAt:Date.now()}); nameEl.value=''; save(); draw(); });
+    nameEl.addEventListener('keydown', (e)=>{ if(e.key==='Enter') document.getElementById('out').click(); });
+    setInterval(()=>{ const n=new Date(); clock.textContent=n.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit', second:'2-digit'}); date.textContent=n.toLocaleDateString([], {weekday:'short', month:'short', day:'numeric', year:'numeric'}); draw(); }, 1000);
+  </script>
+</body>
+</html>
