@@ -20,7 +20,22 @@
       </div>
     </header>
 
-    <section class="panel">
+    <section class="panel workspace-panel">
+      <div class="panel-head">
+        <h2>Connected Workspace</h2>
+        <p class="sub small">Switch between dashboard only, bathroom break only, or a split view with both.</p>
+      </div>
+      <div class="workspace-controls">
+        <button id="viewDashboard" type="button" class="view-btn active">Dashboard</button>
+        <button id="viewBathroom" type="button" class="view-btn">Bathroom Break</button>
+        <button id="viewSplit" type="button" class="view-btn">Split View</button>
+        <a href="apps/bathroom-pass/index.html?teacher=mr-bramer" target="_blank" rel="noopener noreferrer" class="open-link">Open Bathroom in new tab</a>
+      </div>
+    </section>
+
+    <div id="workspaceGrid" class="workspace-grid mode-dashboard">
+      <div id="dashboardColumn" class="workspace-col">
+        <section class="panel">
       <div class="panel-head">
         <h2>Bell Schedule</h2>
         <p id="scheduleTimer" class="meta">Loading live timer...</p>
@@ -58,9 +73,32 @@
       </div>
 
       <div id="schedule" class="schedule"></div>
-    </section>
+        </section>
 
-    <section class="panel">
+        <section class="panel">
+          <div class="panel-head">
+            <h2>Random Student Picker</h2>
+            <p class="sub small">Pull one student from the selected period roster.</p>
+          </div>
+          <div class="controls student-picker-controls">
+            <label>
+              Teacher ID
+              <input id="pickerTeacherId" type="text" value="mr-bramer" />
+            </label>
+            <label>
+              Period
+              <select id="pickerPeriod"></select>
+            </label>
+            <div class="picker-actions">
+              <button id="syncCurrentPeriod" type="button">Use current period</button>
+              <button id="pickStudent" type="button" class="primary-btn">Pick random student</button>
+            </div>
+          </div>
+          <p id="pickerResult" class="picker-result">No student selected yet.</p>
+          <p id="pickerMeta" class="meta">Roster source: default dashboard roster.</p>
+        </section>
+
+        <section class="panel">
       <div class="panel-head">
         <h2>Focus Tools</h2>
         <p class="sub small">Toggle background lofi and run a class timer with an ending sound.</p>
@@ -97,7 +135,19 @@
           <p id="timerStatus" class="meta">Ready to start.</p>
         </div>
       </div>
-    </section>
+        </section>
+      </div>
+
+      <div id="bathroomColumn" class="workspace-col">
+        <section class="panel bathroom-panel">
+          <div class="panel-head">
+            <h2>Bathroom Break</h2>
+            <p class="sub small">Embedded live bathroom break board.</p>
+          </div>
+          <iframe id="bathroomFrame" src="apps/bathroom-pass/index.html?teacher=mr-bramer" title="Bathroom Break"></iframe>
+        </section>
+      </div>
+    </div>
   </main>
 
   <script src="app.js"></script>
